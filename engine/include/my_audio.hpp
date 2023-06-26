@@ -17,7 +17,7 @@ struct my_audio
     {
         SDL_AudioSpec wav;
         wav.freq     = 44100;
-        wav.format   = AUDIO_S16;
+        wav.format   = SDL_AUDIO_S16;
         wav.channels = 2;
         wav.samples  = 1024;
         wav.callback = MyCallBack;
@@ -115,14 +115,14 @@ void MyCallBack(void* userdata, Uint8* stream, int len)
                 if (length < part)
                 {
                     SDL_MixAudioFormat(
-                        stream, current_position, AUDIO_S16, length, vol);
+                        stream, current_position, SDL_AUDIO_S16, length, vol);
                     data->offset += static_cast<size_t>(len);
                     break;
                 }
                 else
                 {
                     SDL_MixAudioFormat(
-                        stream, current_position, AUDIO_S16, part, vol);
+                        stream, current_position, SDL_AUDIO_S16, part, vol);
                     data->offset = 0;
                     length -= part;
                     data->continue_play = data->looped;

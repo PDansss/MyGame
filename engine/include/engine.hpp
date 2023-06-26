@@ -13,11 +13,11 @@
 
 using namespace std;
 
-ENGSPEC class IEngine
+class ENGSPEC IEngine
 {
 public:
     // general
-    virtual void         init(float x, float y)      = 0;
+    virtual void         init(int x, int y)          = 0;
     virtual bool         read_events()               = 0;
     virtual int          check_button(string button) = 0;
     virtual unsigned int get_time()                  = 0;

@@ -16,14 +16,6 @@
 #define OPENGL_CONTEXT SDL_GL_CONTEXT_PROFILE_ES
 #endif
 
-void callback_opengl_debug(GLenum                       source,
-                           GLenum                       type,
-                           GLuint                       id,
-                           GLenum                       severity,
-                           GLsizei                      length,
-                           const GLchar*                message,
-                           [[maybe_unused]] const void* userParam);
-
 void* load_func(const char* name)
 {
     SDL_FunctionPointer func_ptr = SDL_GL_GetProcAddress(name);
@@ -33,7 +25,7 @@ void* load_func(const char* name)
 class engine : public IEngine
 {
 public:
-    void init(float x, float y)
+    void init(int x, int y)
     {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
         {
@@ -78,7 +70,7 @@ public:
 
         SDL_AudioSpec want;
         want.freq     = 44100;
-        want.format   = AUDIO_S16;
+        want.format   = SDL_AUDIO_S16;
         want.channels = 2;
         want.samples  = 1024;
         want.callback = my_audio::MyCallBack;
@@ -111,16 +103,7 @@ public:
         my_audio::sounds.push_back(&fon);
         my_audio::sounds.push_back(&shoot);
         SDL_PlayAudioDevice(device);
-
-        glEnable(GL_DEBUG_OUTPUT);
-
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-        glDebugMessageCallback(callback_opengl_debug, nullptr);
-
-        glDebugMessageControl(
-            GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
+    
         init_gui();
     }
 
@@ -193,7 +176,7 @@ public:
 
     int check_button(string button) { return buttons.at(button); }
 
-    unsigned int get_time() { return SDL_GetTicks(); }
+    unsigned int get_time() { return (unsigned int)SDL_GetTicks(); }
 
     void clean()
     {
@@ -435,24 +418,24 @@ public:
                          ImGuiWindowFlags_NoDecoration);
 
         ImGui::SetCursorPos(
-            ImVec2(io.DisplaySize.x * 0.5 - io.DisplaySize.x * 0.045,
-                   io.DisplaySize.y * 0.15));
+            ImVec2(io.DisplaySize.x * 0.5f - io.DisplaySize.x * 0.045f,
+                   io.DisplaySize.y * 0.15f));
         ImGui::TextWrapped("Menu");
 
         ImGui::SetCursorPos(
-            ImVec2(io.DisplaySize.x * 0.375, io.DisplaySize.y * 0.35));
+            ImVec2(io.DisplaySize.x * 0.375f, io.DisplaySize.y * 0.35f));
         if (ImGui::Button(
                 "Play",
-                ImVec2(io.DisplaySize.x * 0.25, io.DisplaySize.y * 0.1)))
+                ImVec2(io.DisplaySize.x * 0.25f, io.DisplaySize.y * 0.1f)))
         {
             show_main_menu = false;
         }
 
         ImGui::SetCursorPos(
-            ImVec2(io.DisplaySize.x * 0.375, io.DisplaySize.y * 0.5));
+            ImVec2(io.DisplaySize.x * 0.375f, io.DisplaySize.y * 0.5f));
         if (ImGui::Button(
                 "Exit",
-                ImVec2(io.DisplaySize.x * 0.25, io.DisplaySize.y * 0.1)))
+                ImVec2(io.DisplaySize.x * 0.25f, io.DisplaySize.y * 0.1f)))
         {
             exit = true;
         }
@@ -479,25 +462,25 @@ public:
                              ImGuiWindowFlags_NoDecoration);
 
             ImGui::SetCursorPos(
-                ImVec2(io.DisplaySize.x * 0.5 - io.DisplaySize.x * 0.055,
-                       io.DisplaySize.y * 0.15));
+                ImVec2(io.DisplaySize.x * 0.5f - io.DisplaySize.x * 0.055f,
+                       io.DisplaySize.y * 0.15f));
             ImGui::Text("PAUSE");
 
             ImGui::SetCursorPos(
-                ImVec2(io.DisplaySize.x * 0.375, io.DisplaySize.y * 0.35));
+                ImVec2(io.DisplaySize.x * 0.375f, io.DisplaySize.y * 0.35f));
             if (ImGui::Button(
                     "Continue",
-                    ImVec2(io.DisplaySize.x * 0.25, io.DisplaySize.y * 0.1)))
+                    ImVec2(io.DisplaySize.x * 0.25f, io.DisplaySize.y * 0.1f)))
             {
                 std::cout << "First!" << std::endl << std::flush;
                 is_paused = false;
             }
 
             ImGui::SetCursorPos(
-                ImVec2(io.DisplaySize.x * 0.375, io.DisplaySize.y * 0.52));
+                ImVec2(io.DisplaySize.x * 0.375f, io.DisplaySize.y * 0.52f));
             if (ImGui::Button(
                     "Exit",
-                    ImVec2(io.DisplaySize.x * 0.25, io.DisplaySize.y * 0.1)))
+                    ImVec2(io.DisplaySize.x * 0.25f, io.DisplaySize.y * 0.1f)))
             {
                 std::cout << "Second!" << std::endl;
                 is_exit   = true;
@@ -523,7 +506,7 @@ public:
 
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::SetNextWindowSize(
-            ImVec2(io.DisplaySize.x * 0.07 * scale, io.DisplaySize.y * 0.07));
+            ImVec2(io.DisplaySize.x * 0.07f * scale, io.DisplaySize.y * 0.07f));
         ImGui::Begin(
             "PauseButtom",
             0,
@@ -533,7 +516,7 @@ public:
 
         ImGui::SetCursorPos(ImVec2(0, 0));
 
-        ImGui::SetWindowFontScale(0.5);
+        ImGui::SetWindowFontScale(0.5f);
         if (ImGui::Button("X",
                           ImVec2(ImGui::GetContentRegionAvail().x,
                                  ImGui::GetContentRegionAvail().y)))
@@ -545,9 +528,9 @@ public:
 
         ///---------------------------------------------------------------------///
 
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.79, 0));
-        ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.2 * scale,
-                                        io.DisplaySize.y * 0.1 * scale));
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.79f, 0));
+        ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.2f * scale,
+                                        io.DisplaySize.y * 0.1f * scale));
 
         ImGui::Begin(
             "Score",
@@ -557,7 +540,7 @@ public:
                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
 
         ImGui::SetCursorPos(ImVec2(0, 0));
-        ImGui::SetWindowFontScale(0.35);
+        ImGui::SetWindowFontScale(0.35f);
         ImGui::Text("SCORE: %d", score);
 
         ImGui::End();
@@ -626,7 +609,7 @@ public:
 
             int k = 0;
 
-            for (int j = 0; j < num; j++)
+            for (unsigned int j = 0; j < num; j++)
             {
 
                 vert[k] = vertex[j].pos.x;
@@ -649,7 +632,7 @@ public:
                 vert[k] = ((color & 0xFF000000) >> 24) / 255.f;
                 k++;
             }
-            for (int j = 0; j < num_ind; j++)
+            for (unsigned int j = 0; j < num_ind; j++)
             {
                 indx[j] = static_cast<unsigned int>(index[j]);
             }
@@ -797,94 +780,5 @@ void delete_engine(IEngine* engine)
     else
     {
         throw runtime_error("Engine does not exist!");
-    }
-}
-
-const char* source_to_strv(GLenum source)
-{
-    switch (source)
-    {
-        case GL_DEBUG_SOURCE_API:
-            return "API";
-        case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            return "SHADER_COMPILER";
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            return "WINDOW_SYSTEM";
-        case GL_DEBUG_SOURCE_THIRD_PARTY:
-            return "THIRD_PARTY";
-        case GL_DEBUG_SOURCE_APPLICATION:
-            return "APPLICATION";
-        case GL_DEBUG_SOURCE_OTHER:
-            return "OTHER";
-    }
-    return "unknown";
-}
-
-const char* type_to_strv(GLenum type)
-{
-    switch (type)
-    {
-        case GL_DEBUG_TYPE_ERROR:
-            return "ERROR";
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            return "DEPRECATED_BEHAVIOR";
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            return "UNDEFINED_BEHAVIOR";
-        case GL_DEBUG_TYPE_PERFORMANCE:
-            return "PERFORMANCE";
-        case GL_DEBUG_TYPE_PORTABILITY:
-            return "PORTABILITY";
-        case GL_DEBUG_TYPE_MARKER:
-            return "MARKER";
-        case GL_DEBUG_TYPE_PUSH_GROUP:
-            return "PUSH_GROUP";
-        case GL_DEBUG_TYPE_POP_GROUP:
-            return "POP_GROUP";
-        case GL_DEBUG_TYPE_OTHER:
-            return "OTHER";
-    }
-    return "unknown";
-}
-
-const char* severity_to_strv(GLenum severity)
-{
-    switch (severity)
-    {
-        case GL_DEBUG_SEVERITY_HIGH:
-            return "HIGH";
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            return "MEDIUM";
-        case GL_DEBUG_SEVERITY_LOW:
-            return "LOW";
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            return "NOTIFICATION";
-    }
-    return "unknown";
-}
-
-array<char, GL_MAX_DEBUG_MESSAGE_LENGTH> local_log_buff;
-
-void callback_opengl_debug(GLenum                       source,
-                           GLenum                       type,
-                           GLuint                       id,
-                           GLenum                       severity,
-                           GLsizei                      length,
-                           const GLchar*                message,
-                           [[maybe_unused]] const void* userParam)
-{
-    auto& buff{ local_log_buff };
-    int   num_chars = snprintf(buff.data(),
-                             buff.size(),
-                             "%s %s %d %s %.*s\n",
-                             source_to_strv(source),
-                             type_to_strv(type),
-                             id,
-                             severity_to_strv(severity),
-                             length,
-                             message);
-
-    if (num_chars > 0)
-    {
-        cerr.write(buff.data(), num_chars);
     }
 }

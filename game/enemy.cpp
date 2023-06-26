@@ -18,9 +18,12 @@ public:
         engine             = eng;
         player             = play;
         tank_x             = x;
+		start_x            = x;
         tank_y             = y;
+		start_y            = y;
         normolize_matrix   = norm_matrix;
         start_base_angle   = base_ang;
+		base_angle         = base_ang;
         start_turret_angle = tur_ang;
         turret_angle       = tur_ang;
         scale_coefficient  = coeff;
@@ -65,12 +68,12 @@ public:
 
     void update(vector<obstacle>& objects)
     {
-        float time = engine->get_time();
+        unsigned int time = engine->get_time();
         if (!isDead)
         {
             aim(player);
 
-            if (time - previos_intrepolation_base_time > rand() % 5000 + 4500)
+            if (time - previos_intrepolation_base_time > (unsigned int)(rand() % 5000 + 4500))
             {
                 vector<float> hitbox;
                 int           i = 0;
@@ -108,26 +111,26 @@ public:
                 {
                     if (dx > 0)
                     {
-                        base_angle   = base_angle + 3.14;
-                        turret_angle = turret_angle + 3.14;
+                        base_angle   = base_angle + 3.14f;
+                        turret_angle = turret_angle + 3.14f;
                     }
                     else
                     {
-                        base_angle   = base_angle - 3.14;
-                        turret_angle = turret_angle - 3.14;
+                        base_angle   = base_angle - 3.14f;
+                        turret_angle = turret_angle - 3.14f;
                     }
                 }
                 else
                 {
                     if (dy < 0)
                     {
-                        base_angle   = base_angle - 3.14;
-                        turret_angle = turret_angle - 3.14;
+                        base_angle   = base_angle - 3.14f;
+                        turret_angle = turret_angle - 3.14f;
                     }
                     else
                     {
-                        base_angle   = base_angle + 3.14;
-                        turret_angle = turret_angle + 3.14;
+                        base_angle   = base_angle + 3.14f;
+                        turret_angle = turret_angle + 3.14f;
                     }
                 }
                 desired_turret_angle = turret_angle;
@@ -151,13 +154,13 @@ public:
 
                 *score += 1;
 
-                set_color(triangle_1_base, 0.45, 0.45, 0.45);
-                set_color(triangle_2_base, 0.45, 0.45, 0.45);
-                set_color(triangle_1_turret, 0.45, 0.45, 0.45);
-                set_color(triangle_2_turret, 0.45, 0.45, 0.45);
+                set_color(triangle_1_base, 0.45f, 0.45f, 0.45f);
+                set_color(triangle_2_base, 0.45f, 0.45f, 0.45f);
+                set_color(triangle_1_turret, 0.45f, 0.45f, 0.45f);
+                set_color(triangle_2_turret, 0.45f, 0.45f, 0.45f);
                 explosion_animation.add_animation(tank_x * normolize_matrix[0],
                                                   tank_y * normolize_matrix[4],
-                                                  1.8);
+                                                  1.8f);
                 previos_time = time;
             }
 
@@ -166,7 +169,7 @@ public:
                 if (time - previos_intrepolation_time > 60)
                 {
                     if (t < 1)
-                        t += 0.1;
+                        t += 0.1f;
 
                     turret_angle =
                         (start_turret_angle +
@@ -198,7 +201,7 @@ public:
             }
             else
             {
-                float color = 0.45f + ((time - previos_time) / 20000) * (0.55);
+                float color = 0.45f + ((time - previos_time) / 20000.f) * (0.55f);
                 set_color(triangle_1_base, color, color, color);
                 set_color(triangle_2_base, color, color, color);
                 set_color(triangle_1_turret, color, color, color);
@@ -256,11 +259,12 @@ public:
     {
         tank_x     = start_x;
         tank_y     = start_y;
-        base_angle = 0;
-        set_color(triangle_1_base, 1.0, 1.0, 1.0);
-        set_color(triangle_2_base, 1.0, 1.0, 1.0);
-        set_color(triangle_1_turret, 1.0, 1.0, 1.0);
-        set_color(triangle_2_turret, 1.0, 1.0, 1.0);
+        base_angle = start_base_angle;
+		turret_angle = start_turret_angle;
+        set_color(triangle_1_base, 1.0f, 1.0f, 1.0f);
+        set_color(triangle_2_base, 1.0f, 1.0f, 1.0f);
+        set_color(triangle_1_turret, 1.0f, 1.0f, 1.0f);
+        set_color(triangle_2_turret, 1.0f, 1.0f, 1.0f);
         isDead = false;
     }
 
@@ -292,27 +296,27 @@ private:
     float tank_y;
     float start_x;
     float start_y;
-    float base_angle;
+    float base_angle = 0;
     float turret_angle;
     bool  isDead = false;
 
-    float tank_speed = 0.0015;
+    float tank_speed = 0.005f;
 
-    float        field_of_view = 0.8;
-    float        dx = 0, dy = 0, param = 1;
+    float        field_of_view = 0.8f;
+    float        dx = 0.f, dy = 0.f, param = 1.f;
     unsigned int previos_time = 0;
     unsigned int temp;
 
     unsigned int previos_intrepolation_time = 0;
-    float        desired_turret_angle       = 0;
+    float        desired_turret_angle       = 0.f;
     float        start_turret_angle;
-    float        t = 0;
+    float        t = 0.f;
 
     unsigned int  previos_intrepolation_base_time = 0;
-    float         desired_base_angle              = 0;
-    float         start_base_angle                = 0;
-    float         t2                              = 0;
-    vector<float> angiles{ 0, 1.57, 3.14, 4.71 };
+    float         desired_base_angle              = 0.f;
+    float         start_base_angle                = 0.f;
+    float         t2                              = 0.f;
+    vector<float> angiles{ 0.f, 1.57f, 3.14f, 4.71f };
 
     float temp_ang;
 
@@ -361,8 +365,8 @@ private:
 
     vector<float> get_hitbox(float d_x, float d_y, float d_angle)
     {
-        float left_down_x = (tank_x + d_x - 0.2) * normolize_matrix[0];
-        float left_down_y = (tank_y + d_y - 0.1) * normolize_matrix[4];
+        float left_down_x = (tank_x + d_x - 0.2f) * normolize_matrix[0];
+        float left_down_y = (tank_y + d_y - 0.1f) * normolize_matrix[4];
 
         rotate(left_down_x,
                left_down_y,
@@ -370,8 +374,8 @@ private:
                (tank_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float left_up_x = (tank_x + d_x - 0.2) * normolize_matrix[0];
-        float left_up_y = (tank_y + d_y + 0.1) * normolize_matrix[4];
+        float left_up_x = (tank_x + d_x - 0.2f) * normolize_matrix[0];
+        float left_up_y = (tank_y + d_y + 0.1f) * normolize_matrix[4];
 
         rotate(left_up_x,
                left_up_y,
@@ -379,8 +383,8 @@ private:
                (tank_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float right_down_x = (tank_x + d_x + 0.14) * normolize_matrix[0];
-        float right_down_y = (tank_y + d_y - 0.1) * normolize_matrix[4];
+        float right_down_x = (tank_x + d_x + 0.14f) * normolize_matrix[0];
+        float right_down_y = (tank_y + d_y - 0.1f) * normolize_matrix[4];
 
         rotate(right_down_x,
                right_down_y,
@@ -388,15 +392,15 @@ private:
                (tank_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float right_up_x = (tank_x + d_x + 0.14) * normolize_matrix[0];
-        float right_up_y = (tank_y + d_y + 0.1) * normolize_matrix[4];
+        float right_up_x = (tank_x + d_x + 0.14f) * normolize_matrix[0];
+        float right_up_y = (tank_y + d_y + 0.1f) * normolize_matrix[4];
         rotate(right_up_x,
                right_up_y,
                (tank_x + d_x) * normolize_matrix[0],
                (tank_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float x = (tank_x + d_x + 0.14) * normolize_matrix[0];
+        float x = (tank_x + d_x + 0.14f) * normolize_matrix[0];
         float y = (tank_y + d_y) * normolize_matrix[4];
         rotate(x,
                y,
@@ -404,7 +408,7 @@ private:
                (tank_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float _x = (tank_x + d_x - 0.2) * normolize_matrix[0];
+        float _x = (tank_x + d_x - 0.2f) * normolize_matrix[0];
         float _y = (tank_y + d_y) * normolize_matrix[4];
         rotate(_x,
                _y,
@@ -433,12 +437,12 @@ private:
                 float obj_y =
                     objects[i].y * normolize_matrix[4] * scale_coefficient;
 
-                float obj_left_down_x = (obj_x - 0.1 * normolize_matrix[0]);
-                float obj_left_down_y = (obj_y - 0.1 * normolize_matrix[4]);
+                float obj_left_down_x = (obj_x - 0.1f * normolize_matrix[0]);
+                float obj_left_down_y = (obj_y - 0.1f * normolize_matrix[4]);
 
-                float obj_right_down_x = (obj_x + 0.1 * normolize_matrix[0]);
+                float obj_right_down_x = (obj_x + 0.1f * normolize_matrix[0]);
 
-                float obj_right_up_y = (obj_y + 0.1 * normolize_matrix[4]);
+                float obj_right_up_y = (obj_y + 0.1f * normolize_matrix[4]);
 
                 for (int j = 0; j < hitbox.size(); j += 2)
                 {

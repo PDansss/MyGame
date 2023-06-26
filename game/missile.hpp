@@ -16,7 +16,7 @@ class Missile
 public:
     void add_missile_to_stack(float x, float y, float angle)
     {
-        missiles.push({ x, y, 0, 0, angle });
+        missiles.push({ x, y, 0.f, 0.f, angle });
     }
     void draw_missile(IEngine* eng, vector<float> normolize_matrix)
     {
@@ -99,7 +99,7 @@ public:
                     float distance = sqrt(DX * DX + DY * DY);
 
                     if (distance <
-                        0.07 * scaling_coefficient * normolize_matrix[0])
+                        0.07f * scaling_coefficient * normolize_matrix[0])
                     {
                         missile_collision = true;
                         if (objects[i].change)
@@ -107,7 +107,7 @@ public:
                         if (objects[i].breakable)
                             objects[i].change = true;
 
-                        anim.add_animation(X, Y, 1.5);
+                        anim.add_animation(X, Y, 1.5f);
                         break;
                     }
                 }
@@ -159,7 +159,7 @@ public:
                 float dY       = obj_y - player_y;
                 float distance = sqrt(dX * dX + dY * dY);
 
-                if (distance <= 0.1 * normolize_matrix[0] * scale_coeff)
+                if (distance <= 0.1f * normolize_matrix[0] * scale_coeff)
                 {
                     collision = true;
                 }
@@ -217,7 +217,7 @@ public:
                     float dY       = obj_y - player_y;
                     float distance = sqrt(dX * dX + dY * dY);
 
-                    if (distance <= 0.1 * normolize_matrix[0] * scale_coeff)
+                    if (distance <= 0.1f * normolize_matrix[0] * scale_coeff)
                     {
                         collision = true;
                     }
@@ -242,7 +242,7 @@ public:
 private:
     stack<missile> missiles;
     my_math        matrices;
-    float          missile_speed = 20;
+    float          missile_speed = 25.f;
 
     vector<float> missile_box = { -0.041f, -0.022f, 0.0f,   1.0f,    1.0f,
                                   1.0f,    1.0f,    1.0f,   -0.041f, 0.022f,

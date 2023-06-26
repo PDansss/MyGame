@@ -92,7 +92,7 @@ public:
     void update(vector<obstacle>& objects)
     {
 
-        float d_x = 0, d_y = 0, d_angle = 0;
+        float d_x = 0.f, d_y = 0.f, d_angle = 0.f;
 
         if (!isDead)
         {
@@ -177,8 +177,8 @@ public:
     }
     vector<float> get_hitbox(float d_x, float d_y, float d_angle)
     {
-        float left_down_x = (tank_center_x + d_x - 0.2) * normolize_matrix[0];
-        float left_down_y = (tank_center_y + d_y - 0.1) * normolize_matrix[4];
+        float left_down_x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
+        float left_down_y = (tank_center_y + d_y - 0.1f) * normolize_matrix[4];
 
         rotate(left_down_x,
                left_down_y,
@@ -186,8 +186,8 @@ public:
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float left_up_x = (tank_center_x + d_x - 0.2) * normolize_matrix[0];
-        float left_up_y = (tank_center_y + d_y + 0.1) * normolize_matrix[4];
+        float left_up_x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
+        float left_up_y = (tank_center_y + d_y + 0.1f) * normolize_matrix[4];
 
         rotate(left_up_x,
                left_up_y,
@@ -195,8 +195,8 @@ public:
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float right_down_x = (tank_center_x + d_x + 0.14) * normolize_matrix[0];
-        float right_down_y = (tank_center_y + d_y - 0.1) * normolize_matrix[4];
+        float right_down_x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
+        float right_down_y = (tank_center_y + d_y - 0.1f) * normolize_matrix[4];
 
         rotate(right_down_x,
                right_down_y,
@@ -204,15 +204,15 @@ public:
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float right_up_x = (tank_center_x + d_x + 0.14) * normolize_matrix[0];
-        float right_up_y = (tank_center_y + d_y + 0.1) * normolize_matrix[4];
+        float right_up_x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
+        float right_up_y = (tank_center_y + d_y + 0.1f) * normolize_matrix[4];
         rotate(right_up_x,
                right_up_y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float x = (tank_center_x + d_x + 0.14) * normolize_matrix[0];
+        float x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
         float y = (tank_center_y + d_y) * normolize_matrix[4];
         rotate(x,
                y,
@@ -220,7 +220,7 @@ public:
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float _x = (tank_center_x + d_x - 0.2) * normolize_matrix[0];
+        float _x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
         float _y = (tank_center_y + d_y) * normolize_matrix[4];
         rotate(_x,
                _y,
@@ -249,12 +249,12 @@ public:
                 float obj_y =
                     objects[i].y * normolize_matrix[4] * scaling_coefficient;
 
-                float obj_left_down_x = (obj_x - 0.1 * normolize_matrix[0]);
-                float obj_left_down_y = (obj_y - 0.1 * normolize_matrix[4]);
+                float obj_left_down_x = (obj_x - 0.1f * normolize_matrix[0]);
+                float obj_left_down_y = (obj_y - 0.1f * normolize_matrix[4]);
 
-                float obj_right_down_x = (obj_x + 0.1 * normolize_matrix[0]);
+                float obj_right_down_x = (obj_x + 0.1f * normolize_matrix[0]);
 
-                float obj_right_up_y = (obj_y + 0.1 * normolize_matrix[4]);
+                float obj_right_up_y = (obj_y + 0.1f * normolize_matrix[4]);
 
                 for (int j = 0; j < hitbox.size(); j += 2)
                 {
@@ -326,9 +326,9 @@ private:
     vector<stack<missile>*> positions;
 
     // tank initial params
-    float tank_speed         = 0.005;
-    float base_angle_speed   = 0.02;
-    float turret_angle_speed = 0.1;
+    float tank_speed         = 0.005f;
+    float base_angle_speed   = 0.03f;
+    float turret_angle_speed = 0.1f;
 
     // tank initial params
     float start_x, start_y, start_base_angle, start_turret_angle;
