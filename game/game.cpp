@@ -1,11 +1,11 @@
 #include "engine.hpp"
 #include "tank.hpp"
 
-int main()
+int main(int argc, char *argv[])
 {
     IEngine* myeng = create_engine();
 
-    int width  = 1920;
+    int width  = 2255;
     int height = 1080;
     float scale  = 0.4f;
 

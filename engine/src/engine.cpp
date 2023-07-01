@@ -16,6 +16,16 @@
 #define OPENGL_CONTEXT SDL_GL_CONTEXT_PROFILE_ES
 #endif
 
+#include <android/log.h>
+#include <GLES3/gl3.h>
+
+
+// Ваш код C++
+
+void logToLogcat(const char* message) {
+    __android_log_print(ANDROID_LOG_ERROR, "MyApp", "%s", message);
+}
+
 void* load_func(const char* name)
 {
     SDL_FunctionPointer func_ptr = SDL_GL_GetProcAddress(name);
@@ -33,18 +43,21 @@ public:
         }
         width  = x;
         height = y;
-
+		logToLogcat("HELLO");
         window = SDL_CreateWindow("TANKS", width, height, SDL_WINDOW_OPENGL);
-
+		logToLogcat("Window Created!");
+		
         SDL_SetWindowFullscreen(window, SDL_TRUE);
 		
 		int   widthN, heightN;
-        SDL_GetWindowSizeInPixels(window, &widthN, &heightN);
-				
-		norm = math.matrix_multiplying(math.scaling_matrix((float)heightN/(float)widthN, 1), math.scaling_matrix(0.4f, 0.4f));
+        SDL_GetWindowSizeInPixels(window, &heightN, &widthN);
+
+        norm = math.matrix_multiplying(math.scaling_matrix((float)heightN/(float)widthN, 1), math.scaling_matrix(0.4f, 0.4f));
 
         if (window == nullptr)
         {
+			logToLogcat("Window NOT Created!");
+
             throw runtime_error("Сould not create a window!");
         }
         cout << "Engine was initialized!\n";
@@ -56,20 +69,26 @@ public:
 
         if (opengl_context == nullptr)
         {
+			logToLogcat("could not create OpenGL ES context!");
+            logToLogcat(SDL_GetError());
             throw runtime_error("Engine could not create OpenGL ES context!");
         }
-
+        logToLogcat("Create OpenGL ES context!");
         if (!gladLoadGLES2Loader(load_func))
         {
+            logToLogcat("Could not initialize OpenGL ES context!");
             throw runtime_error(
                 "Engine could not initialize OpenGL ES functions!");
         }
+        //glViewport(0,0,heightN,widthN);
 
-        main_program = set_program("./res/shaders/vertex_shader.txt",
-                                   "./res/shaders/fragment_shader.txt");
+        glViewport(0,0,width,height);
+        logToLogcat("Could initialize OpenGL ES context!");
+        main_program = set_program("res/shaders/vertex_shader.txt",
+                                   "res/shaders/fragment_shader.txt");
 
-        imgui_program = set_program("./res/shaders/imgui_vertex_shader.txt",
-                                    "./res/shaders/imgui_fragment_shader.txt");
+        imgui_program = set_program("res/shaders/imgui_vertex_shader.txt",
+                                    "res/shaders/imgui_fragment_shader.txt");
 
         SDL_AudioSpec device_info;
 
@@ -83,26 +102,26 @@ public:
         want.userdata = nullptr;
         device        = SDL_OpenAudioDevice(nullptr, 0, &want, &device_info, 0);
 
-        shoot.set_data("./res/music/shot.wav", device_info, false);
-        fon.set_data("./res/music/game_music.wav", device_info, true);
-        menu.set_data("./res/music/menu_music.wav", device_info, true);
+        shoot.set_data("res/music/shot.wav", device_info, false);
+        fon.set_data("res/music/game_music.wav", device_info, true);
+        menu.set_data("res/music/menu_music.wav", device_info, true);
 
         textures.resize(14);
-        textures[0] = set_texture("./res/textures/explosion/01.png");
-        textures[1] = set_texture("./res/textures/explosion/02.png");
-        textures[2] = set_texture("./res/textures/explosion/03.png");
-        textures[3] = set_texture("./res/textures/explosion/04.png");
-        textures[4] = set_texture("./res/textures/explosion/05.png");
-        textures[5] = set_texture("./res/textures/explosion/06.png");
-        textures[6] = set_texture("./res/textures/explosion/07.png");
+        textures[0] = set_texture("res/textures/explosion/01.png");
+        textures[1] = set_texture("res/textures/explosion/02.png");
+        textures[2] = set_texture("res/textures/explosion/03.png");
+        textures[3] = set_texture("res/textures/explosion/04.png");
+        textures[4] = set_texture("res/textures/explosion/05.png");
+        textures[5] = set_texture("res/textures/explosion/06.png");
+        textures[6] = set_texture("res/textures/explosion/07.png");
 
-        textures[7]  = set_texture("./res/textures/tank_part_1.png");
-        textures[8]  = set_texture("./res/textures/tank_part_2.png");
-        textures[9]  = set_texture("./res/textures/missile.png");
-        textures[10] = set_texture("./res/textures/brick_wall.png");
-        textures[11] = set_texture("./res/textures/broken_wall.png");
-        textures[12] = set_texture("./res/textures/stone_wall.png");
-        textures[13] = set_texture("./res/textures/background.png");
+        textures[7]  = set_texture("res/textures/tank_part_1.png");
+        textures[8]  = set_texture("res/textures/tank_part_2.png");
+        textures[9]  = set_texture("res/textures/missile.png");
+        textures[10] = set_texture("res/textures/brick_wall.png");
+        textures[11] = set_texture("res/textures/broken_wall.png");
+        textures[12] = set_texture("res/textures/stone_wall.png");
+        textures[13] = set_texture("res/textures/background.png");
 
         my_audio::sounds.push_back(&menu);
         my_audio::sounds.push_back(&fon);
@@ -231,22 +250,15 @@ public:
 
     unsigned int set_texture(const char* path)
     {
+        SDL_RWops* src = SDL_RWFromFile(path, "rb");
         vector<byte> info;
-        ifstream     png_file(path, ios_base::binary);
         GLuint       texture_handle;
-        if (png_file.good())
-        {
-            png_file.seekg(0, ios_base::end);
-            int end_file = png_file.tellg();
-            png_file.seekg(0, ios_base::beg);
-            info.resize(end_file);
-            png_file.read(reinterpret_cast<char*>(info.data()),
-                          static_cast<streamsize>(info.size()));
-        }
-        else
-        {
-            cerr << "Something wrong with this file: " << path << endl;
-            return false;
+
+        if (src != NULL) {
+            unsigned int size = SDL_RWsize(src);
+            info.resize(size);
+            size_t bytesRead = SDL_RWread(src, info.data(), size);
+
         }
 
         vector<byte>  image_pixels;
@@ -710,20 +722,19 @@ private:
 
     string get_source(const char* filename)
     {
-        string   source;
-        ifstream input_shader_src(filename);
-        if (input_shader_src.good())
-        {
-            input_shader_src.seekg(0, ios::beg);
-            source.assign(istreambuf_iterator<char>(input_shader_src),
-                          istreambuf_iterator<char>());
+        SDL_RWops* src = SDL_RWFromFile(filename, "r");
+        if (src != NULL) {
+            unsigned int size = SDL_RWsize(src);
+            char* code = new char[size + 1];
+            size_t bytesRead = SDL_RWread(src, code, size);
+            code[size] = '\0';
+            string source(code);
+            delete[] code;
             return source;
         }
-        else
-        {
-            cerr << "Something wrong with this file " << filename << endl;
-            return "";
-        }
+        logToLogcat("Something wrong with this file ");
+        logToLogcat("filename");
+        return "";
     }
 
     GLuint load_shader(GLenum shader_type, const char* file)
@@ -739,6 +750,7 @@ private:
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
         if (!compiled)
         {
+
             GLint infolen = 0;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infolen);
             if (infolen > 1)
@@ -746,11 +758,13 @@ private:
                 char* error = new char[infolen];
                 glGetShaderInfoLog(shader, infolen, NULL, error);
                 std::cerr << error << std::endl;
+                logToLogcat(error);
                 delete[] error;
             }
             glDeleteShader(shader);
             return 0;
         }
+        logToLogcat("All Good!");
         return shader;
     }
 };

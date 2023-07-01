@@ -1,6 +1,7 @@
 #include <fstream>
 #include <stack>
 #include <vector>
+#include <sstream>
 
 #include "engine.hpp"
 #include "my_math.hpp"
@@ -37,28 +38,30 @@ public:
 
     void set_obstacle(const char* path)
     {
-        ifstream ifs(path); // Note the typo; the file can't be opened.
-        float    x, y;
-        string   type;
-
-        if (!ifs.is_open())
-        {
-            cerr << "Can't open file: " << path << endl;
+        unsigned int size;
+        SDL_RWops* src = SDL_RWFromFile(path, "r");
+        char* code = nullptr;
+        if (src != NULL) {
+            size = SDL_RWsize(src);
+            code = new char[size + 1];
+            SDL_RWread(src, code, size);
+            code[size] = '\0';
         }
-        else
+        istringstream iss(reinterpret_cast<const char*>(code)); // Создание std::istringstream с исходными данными
+        string type;
+        string x, y;
+
+        while (iss >> x >> y >> type)
         {
-            while (ifs >> x >> y >> type)
+            if (type == "stones")
             {
-                if (type == "stones")
-                {
-                    my_obstacles.push_back(
-                        { x, y, true, stone_wall, false, false });
-                }
-                else
-                {
-                    my_obstacles.push_back(
-                        { x, y, true, bricks_wall, true, false });
-                }
+                my_obstacles.push_back(
+                    { stof(x), stof(y), true, stone_wall, false, false });
+            }
+            else
+            {
+                my_obstacles.push_back(
+                    { stof(x), stof(y), true, bricks_wall, true, false });
             }
         }
     }

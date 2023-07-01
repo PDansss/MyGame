@@ -1,0 +1,16 @@
+#version 300 es
+precision highp float;
+
+layout (location = 0) in vec2 position;
+layout (location = 1) in vec2 tex_pos;
+layout (location = 2) in vec4 color;
+
+uniform mat3 proj_mat;
+out vec2 Frag_tex;
+out vec4 v_color;
+
+void main(){
+    Frag_tex = tex_pos;
+    v_color = color;
+    gl_Position = vec4(proj_mat * vec3(position.xy, 1.0f),1.0f);
+}

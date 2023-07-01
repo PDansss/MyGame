@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include <SDL3/SDL.h>
 #include "imgui.h"
 
 #pragma once
@@ -9,6 +9,11 @@
 #define ENGSPEC __declspec(dllexport)
 #else
 #define ENGSPEC
+#endif
+
+#ifdef __ANDROID__
+#include <SDL3/SDL_main.h>
+#define main SDL_main
 #endif
 
 using namespace std;
