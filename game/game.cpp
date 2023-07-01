@@ -9,13 +9,8 @@ int main()
     int height = 1080;
     float scale  = 0.4f;
 
-    myeng->init(width, height);
-
-    my_math mat;
-
-    vector<float> norm =
-        mat.matrix_multiplying(mat.scaling_matrix((float)height / (float)width, 1.f),
-                               mat.scaling_matrix(scale, scale));
+	vector<float> norm;
+    myeng->init(width, height,norm);
 
     float scaling_coff = 1 / scale;
 

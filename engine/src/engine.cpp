@@ -25,7 +25,7 @@ void* load_func(const char* name)
 class engine : public IEngine
 {
 public:
-    void init(int x, int y)
+    void init(int x, int y, vector<float>& norm)
     {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
         {
@@ -37,6 +37,11 @@ public:
         window = SDL_CreateWindow("TANKS", width, height, SDL_WINDOW_OPENGL);
 
         SDL_SetWindowFullscreen(window, SDL_TRUE);
+		
+		int   widthN, heightN;
+        SDL_GetWindowSizeInPixels(window, &widthN, &heightN);
+				
+		norm = math.matrix_multiplying(math.scaling_matrix((float)heightN/(float)widthN, 1), math.scaling_matrix(0.4f, 0.4f));
 
         if (window == nullptr)
         {
