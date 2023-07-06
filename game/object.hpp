@@ -1,7 +1,6 @@
 #include <fstream>
 #include <stack>
 #include <vector>
-#include <sstream>
 
 #include "engine.hpp"
 #include "my_math.hpp"
@@ -28,40 +27,38 @@ public:
         engine           = eng;
         normolize_matrix = norm;
 
-        background_texture = eng->get_texture(13);
-        stone_wall         = eng->get_texture(12);
-        bricks_wall        = eng->get_texture(10);
-        brooken_texture    = eng->get_texture(11);
+        background_texture = engine->get_texture("background");
+        stone_wall         = engine->get_texture("stone_wall");
+        bricks_wall        = engine->get_texture("brick_wall");
+        brooken_texture    = engine->get_texture("broken_wall");
 
         scale_param = scale_param_;
     }
 
     void set_obstacle(const char* path)
     {
-        unsigned int size;
-        SDL_RWops* src = SDL_RWFromFile(path, "r");
-        char* code = nullptr;
-        if (src != NULL) {
-            size = SDL_RWsize(src);
-            code = new char[size + 1];
-            SDL_RWread(src, code, size);
-            code[size] = '\0';
-        }
-        istringstream iss(reinterpret_cast<const char*>(code)); // Создание std::istringstream с исходными данными
-        string type;
-        string x, y;
+        ifstream ifs(path); // Note the typo; the file can't be opened.
+        float    x, y;
+        string   type;
 
-        while (iss >> x >> y >> type)
+        if (!ifs.is_open())
         {
-            if (type == "stones")
+            cerr << "Can't open file: " << path << endl;
+        }
+        else
+        {
+            while (ifs >> x >> y >> type)
             {
-                my_obstacles.push_back(
-                    { stof(x), stof(y), true, stone_wall, false, false });
-            }
-            else
-            {
-                my_obstacles.push_back(
-                    { stof(x), stof(y), true, bricks_wall, true, false });
+                if (type == "stones")
+                {
+                    my_obstacles.push_back(
+                        { x, y, true, stone_wall, false, false });
+                }
+                else
+                {
+                    my_obstacles.push_back(
+                        { x, y, true, bricks_wall, true, false });
+                }
             }
         }
     }
@@ -69,17 +66,11 @@ public:
     void render()
     {
         engine->render_triangle(
-            background_box,
+            "background",
             normolize_matrix,
             matrices.scaling_matrix(scale_param, scale_param),
             matrices.single_matrix(),
-            background_texture,
-            false);
-        engine->render_triangle(
-            background_box2,
-            normolize_matrix,
-            matrices.scaling_matrix(scale_param, scale_param),
-            matrices.single_matrix(),
+            backgroung_color,
             background_texture,
             false);
 
@@ -97,20 +88,12 @@ public:
                     tex = my_obstacles[i].tex;
 
                 engine->render_triangle(
-                    obstacle_box,
+                    "object",
                     normolize_matrix,
                     matrices.shift_matrix(centerX * scale_param,
-                                          centerY * scale_param),
+                        centerY * scale_param),
                     matrices.single_matrix(),
-                    tex,
-                    false);
-
-                engine->render_triangle(
-                    obstacle_box2,
-                    normolize_matrix,
-                    matrices.shift_matrix(centerX * scale_param,
-                                          centerY * scale_param),
-                    matrices.single_matrix(),
+                    obstacle_color,
                     tex,
                     false);
             }
@@ -126,23 +109,6 @@ private:
     unsigned int  background_texture, stone_wall, bricks_wall, brooken_texture;
     vector<obstacle> my_obstacles;
 
-    vector<float> obstacle_box = { -0.1f, 0.1f, 0.0f, 0.6f, 0.5f, 0.4f,
-                                   0.0f,  0.0f, 0.1f, 0.1f, 0.0f, 0.6f,
-                                   0.5f,  0.4f, 1.0f, 0.0f, 0.1f, -0.1f,
-                                   0.0f,  0.6f, 0.5f, 0.4f, 1.0f, 1.0f };
-
-    vector<float> obstacle_box2 = { -0.1f, 0.1f, 0.0f, 0.6f,  0.5f,  0.4f,
-                                    0.0f,  0.0f, 0.1f, -0.1f, 0.0f,  0.6f,
-                                    0.5f,  0.4f, 1.0f, 1.0f,  -0.1f, -0.1f,
-                                    0.0f,  0.6f, 0.5f, 0.4f,  0.0f,  1.0f };
-
-    vector<float> background_box = { -1.0f, 1.0f,  0.0f,  0.75f, 0.75f, 0.75f,
-                                     0.0f,  0.0f,  1.0f,  1.0f,  0.0f,  0.7f,
-                                     0.75f, 0.75f, 1.0f,  0.0f,  1.0f,  -1.0f,
-                                     0.0f,  0.75f, 0.75f, 0.75f, 1.0f,  1.0f };
-
-    vector<float> background_box2 = { -1.0f, 1.0f,  0.0f,  0.75f, 0.75f, 0.75f,
-                                      0.0f,  0.0f,  1.0f,  -1.0f, 0.0f,  0.75f,
-                                      0.75f, 0.75f, 1.0f,  1.0f,  -1.0f, -1.0f,
-                                      0.0f,  0.75f, 0.75f, 0.75f, 0.0f,  1.0f };
+    vector<float> obstacle_color = { 0.6f, 0.5f, 0.4f, 1.0f };
+    vector<float> backgroung_color = { 0.75f, 0.75f, 0.75f, 1.0f };
 };

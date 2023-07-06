@@ -1,26 +1,6 @@
 #include "tank.hpp"
 #include "engine.hpp"
 
-vector<float> triangle_1_base = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                  0.0f,  1.0f,  0.2f,  0.1f,  0.0f,  0.6f,
-                                  0.75f, 0.35f, 0.0f,  0.0f,  0.2f,  -0.1f,
-                                  0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  0.0f };
-
-vector<float> triangle_2_base = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                  0.0f,  1.0f,  0.2f,  -0.1f, 0.0f,  0.6f,
-                                  0.75f, 0.35f, 1.0f,  0.0f,  -0.2f, -0.1f,
-                                  0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  1.0f };
-
-vector<float> triangle_1_turret = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                    0.0f,  1.0f,  0.2f,  0.1f,  0.0f,  0.6f,
-                                    0.75f, 0.35f, 0.0f,  0.0f,  0.2f,  -0.1f,
-                                    0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  0.0f };
-
-vector<float> triangle_2_turret = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                    0.0f,  1.0f,  0.2f,  -0.1f, 0.0f,  0.6f,
-                                    0.75f, 0.35f, 1.0f,  0.0f,  -0.2f, -0.1f,
-                                    0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  1.0f };
-
 class tank : public ITank
 {
 public:
@@ -44,47 +24,29 @@ public:
         turret_angle        = tur_ang;
         start_turret_angle  = tur_ang;
         scaling_coefficient = coeff;
-        base_texture        = eng->get_texture(7);
-        turret_texture      = eng->get_texture(8);
-        missile_texture     = eng->get_texture(9);
     }
 
     void render()
     {
-        // Draw platform
         engine->render_triangle(
-            triangle_1_base,
+            "tank",
             normolize_matrix,
             matrices.shift_matrix(tank_center_x, tank_center_y),
             matrices.rotate_matrix(base_angle),
-            base_texture,
-            false);
-        engine->render_triangle(
-            triangle_2_base,
-            normolize_matrix,
-            matrices.shift_matrix(tank_center_x, tank_center_y),
-            matrices.rotate_matrix(base_angle),
-            base_texture,
+            color,
+            engine->get_texture("tank_part_1"),
             false);
 
-        // Draw turret
         engine->render_triangle(
-            triangle_1_turret,
+            "tank",
             normolize_matrix,
             matrices.shift_matrix(tank_center_x, tank_center_y),
             matrices.rotate_matrix(turret_angle),
-            turret_texture,
+            color,
+            engine->get_texture("tank_part_2"),
             true);
-        engine->render_triangle(
-            triangle_2_turret,
-            normolize_matrix,
-            matrices.shift_matrix(tank_center_x, tank_center_y),
-            matrices.rotate_matrix(turret_angle),
-            turret_texture,
-            true);
-
+   
         // Draw missile
-
         missiles.draw_missile(engine, normolize_matrix);
         explosion_animation.draw_animation(engine, normolize_matrix);
     }
@@ -318,10 +280,11 @@ private:
     my_math       matrices;
     vector<float> normolize_matrix;
     float         scaling_coefficient;
-    unsigned int  base_texture, turret_texture, missile_texture;
 
     animation explosion_animation;
     Missile   missiles;
+
+    vector<float> color = { 0.6f,  0.75f, 0.35f,1.0f };
 
     vector<stack<missile>*> positions;
 
@@ -347,18 +310,6 @@ private:
         y = _x * sin(angle) + _y * cos(angle);
         x += cx;
         y += cy;
-    }
-    void set_color(vector<float>& vec, float r, float g, float b)
-    {
-        vec[3]  = r;
-        vec[4]  = g;
-        vec[5]  = b;
-        vec[11] = r;
-        vec[12] = g;
-        vec[13] = b;
-        vec[19] = r;
-        vec[20] = g;
-        vec[21] = b;
     }
 };
 

@@ -33,32 +33,24 @@ public:
     void render()
     {
         // Draw platform
-        engine->render_triangle(triangle_1_base,
-                                normolize_matrix,
-                                matrices.shift_matrix(tank_x, tank_y),
-                                matrices.rotate_matrix(base_angle),
-                                engine->get_texture(7),
-                                false);
-        engine->render_triangle(triangle_2_base,
-                                normolize_matrix,
-                                matrices.shift_matrix(tank_x, tank_y),
-                                matrices.rotate_matrix(base_angle),
-                                engine->get_texture(7),
-                                false);
 
-        // Draw turret
-        engine->render_triangle(triangle_1_turret,
-                                normolize_matrix,
-                                matrices.shift_matrix(tank_x, tank_y),
-                                matrices.rotate_matrix(turret_angle),
-                                engine->get_texture(8),
-                                true);
-        engine->render_triangle(triangle_2_turret,
-                                normolize_matrix,
-                                matrices.shift_matrix(tank_x, tank_y),
-                                matrices.rotate_matrix(turret_angle),
-                                engine->get_texture(8),
-                                true);
+        engine->render_triangle(
+            "tank",
+            normolize_matrix,
+            matrices.shift_matrix(tank_x, tank_y),
+            matrices.rotate_matrix(base_angle),
+            enemy_color,
+            engine->get_texture("tank_part_1"),
+            false);
+
+        engine->render_triangle(
+            "tank",
+            normolize_matrix,
+            matrices.shift_matrix(tank_x, tank_y),
+            matrices.rotate_matrix(turret_angle),
+            enemy_color,
+            engine->get_texture("tank_part_2"),
+            true);
 
         // Draw missile
 
@@ -154,10 +146,8 @@ public:
 
                 *score += 1;
 
-                set_color(triangle_1_base, 0.45f, 0.45f, 0.45f);
-                set_color(triangle_2_base, 0.45f, 0.45f, 0.45f);
-                set_color(triangle_1_turret, 0.45f, 0.45f, 0.45f);
-                set_color(triangle_2_turret, 0.45f, 0.45f, 0.45f);
+                set_color(enemy_color, 0.45f, 0.45f, 0.45f);
+
                 explosion_animation.add_animation(tank_x * normolize_matrix[0],
                                                   tank_y * normolize_matrix[4],
                                                   1.8f);
@@ -194,18 +184,12 @@ public:
             {
                 previos_time = time;
                 isDead       = false;
-                set_color(triangle_1_base, 1.0f, 1.0f, 1.0f);
-                set_color(triangle_2_base, 1.0f, 1.0f, 1.0f);
-                set_color(triangle_1_turret, 1.0f, 1.0f, 1.0f);
-                set_color(triangle_2_turret, 1.0f, 1.0f, 1.0f);
+                set_color(enemy_color, 1.0f, 1.0f, 1.0f);
             }
             else
             {
-                float color = 0.45f + ((time - previos_time) / 20000.f) * (0.55f);
-                set_color(triangle_1_base, color, color, color);
-                set_color(triangle_2_base, color, color, color);
-                set_color(triangle_1_turret, color, color, color);
-                set_color(triangle_2_turret, color, color, color);
+                float obstacle_color = 0.45f + ((time - previos_time) / 20000.f) * (0.55f);
+                set_color(enemy_color, obstacle_color, obstacle_color, obstacle_color);
             }
         }
         missiles.update(engine,
@@ -261,10 +245,7 @@ public:
         tank_y     = start_y;
         base_angle = start_base_angle;
 		turret_angle = start_turret_angle;
-        set_color(triangle_1_base, 1.0f, 1.0f, 1.0f);
-        set_color(triangle_2_base, 1.0f, 1.0f, 1.0f);
-        set_color(triangle_1_turret, 1.0f, 1.0f, 1.0f);
-        set_color(triangle_2_turret, 1.0f, 1.0f, 1.0f);
+        set_color(enemy_color, 1.0f, 1.0f, 1.0f);
         isDead = false;
     }
 
@@ -320,25 +301,7 @@ private:
 
     float temp_ang;
 
-    vector<float> triangle_1_base = { -0.2f, 0.1f, 0.0f, 1.0f, 1.0f, 1.0f,
-                                      0.0f,  1.0f, 0.2f, 0.1f, 0.0f, 1.0f,
-                                      1.0f,  1.0f, 0.0f, 0.0f, 0.2f, -0.1f,
-                                      0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 0.0f };
-
-    vector<float> triangle_2_base = { -0.2f, 0.1f, 0.0f, 1.0f,  1.0f,  1.0f,
-                                      0.0f,  1.0f, 0.2f, -0.1f, 0.0f,  1.0f,
-                                      1.0f,  1.0f, 1.0f, 0.0f,  -0.2f, -0.1f,
-                                      0.0f,  1.0f, 1.0f, 1.0f,  1.0f,  1.0f };
-
-    vector<float> triangle_1_turret = { -0.2f, 0.1f, 0.0f, 1.0f, 1.0f, 1.0f,
-                                        0.0f,  1.0f, 0.2f, 0.1f, 0.0f, 1.0f,
-                                        1.0f,  1.0f, 0.0f, 0.0f, 0.2f, -0.1f,
-                                        0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 0.0f };
-
-    vector<float> triangle_2_turret = { -0.2f, 0.1f, 0.0f, 1.0f,  1.0f,  1.0f,
-                                        0.0f,  1.0f, 0.2f, -0.1f, 0.0f,  1.0f,
-                                        1.0f,  1.0f, 1.0f, 0.0f,  -0.2f, -0.1f,
-                                        0.0f,  1.0f, 1.0f, 1.0f,  1.0f,  1.0f };
+    vector<float> enemy_color = { 1.0f,1.0f,1.0f,1.0f };
 
     void rotate(float& x, float& y, float cx, float cy, float angle)
     {
@@ -352,15 +315,9 @@ private:
     }
     void set_color(vector<float>& vec, float r, float g, float b)
     {
-        vec[3]  = r;
-        vec[4]  = g;
-        vec[5]  = b;
-        vec[11] = r;
-        vec[12] = g;
-        vec[13] = b;
-        vec[19] = r;
-        vec[20] = g;
-        vec[21] = b;
+        vec[0]  = r;
+        vec[1]  = g;
+        vec[2]  = b;
     }
 
     vector<float> get_hitbox(float d_x, float d_y, float d_angle)

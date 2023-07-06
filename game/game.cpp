@@ -1,18 +1,61 @@
 #include "engine.hpp"
 #include "tank.hpp"
 
-int main(int argc, char *argv[])
+vector<float> tank_vertecies = {
+   -0.2f,  0.1f, 0.0f, 0.0f, 1.0f,
+    0.2f,  0.1f, 0.0f, 0.0f, 0.0f,
+    0.2f, -0.1f, 0.0f, 1.0f, 0.0f,
+   -0.2f, -0.1f, 0.0f, 1.0f, 1.0f
+};
+
+vector<float> missile_vertecies = { 
+   -0.041f, -0.022f, 1.0f, 1.0f, 1.0f,
+   -0.041f,  0.022f, 1.0f, 0.0f, 1.0f,
+    0.041f,  0.022f, 1.0f, 0.0f, 0.0f,
+    0.041f, -0.022f, 1.0f, 1.0f, 0.0f };
+
+vector<float> animation_vertecies = { 
+   -0.1f,  0.1f, 0.0f, 0.0f, 0.0f,
+    0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
+    0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
+   -0.1f, -0.1f, 0.0f, 0.0f, 1.0f };
+
+vector<float> obj_vertecies = { 
+   -0.1f,  0.1f, 0.0f, 0.0f, 0.0f,
+       0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
+       0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
+   -0.1f, -0.1f, 0.0f, 0.0f, 1.0f };
+
+vector<float>background_vertecies = { 
+   -1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+    1.0f,  1.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+   -1.0f, -1.0f, 0.0f, 0.0f, 1.0f };
+
+vector<unsigned int> indexes = { 0,1,2,0,2,3 };
+
+int main()
 {
     IEngine* myeng = create_engine();
 
-    int width  = 2255;
-    int height = 1080;
+	int   width = 1900, height = 680;
+
     float scale  = 0.4f;
+	float scaling_coff = 1 / scale;
 
 	vector<float> norm;
     myeng->init(width, height,norm);
 
-    float scaling_coff = 1 / scale;
+    myeng->set_buffer(myeng->get_vertex_buffer("tank"), tank_vertecies);
+    myeng->set_buffer(myeng->get_index_buffer("tank"), indexes);
+    myeng->set_buffer(myeng->get_vertex_buffer("missile"), missile_vertecies);
+    myeng->set_buffer(myeng->get_index_buffer("missile"), indexes);
+    myeng->set_buffer(myeng->get_vertex_buffer("animation"), animation_vertecies);
+    myeng->set_buffer(myeng->get_index_buffer("animation"), indexes);
+    myeng->set_buffer(myeng->get_vertex_buffer("object"), obj_vertecies);
+    myeng->set_buffer(myeng->get_index_buffer("object"), indexes);
+    myeng->set_buffer(myeng->get_vertex_buffer("background"), background_vertecies);
+    myeng->set_buffer(myeng->get_index_buffer("background"), indexes);
 
     vector<stack<missile>*> positions;
 
@@ -40,7 +83,6 @@ int main(int argc, char *argv[])
     player->set_stack(positions);
 
     obstacles obs(myeng, norm, scaling_coff);
-
     obs.set_obstacle("res/level.txt");
 
     bool show_main_menu = true, pause = false, exit = false;
@@ -51,7 +93,6 @@ int main(int argc, char *argv[])
 		time = myeng->get_time();
 		if(time - temp > 16){
 			temp = time;
-			myeng->next_frame_gui();
 			if (!myeng->read_events() || exit)
 				break;
 

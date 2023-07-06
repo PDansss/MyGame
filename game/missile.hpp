@@ -1,5 +1,6 @@
 #include "animation.hpp"
 #include <stack>
+
 #pragma once
 
 struct missile
@@ -37,18 +38,13 @@ public:
                 centerX + 0.24f * cos(Angile), centerY + 0.24f * sin(Angile));
             vector<float> shoot_rotate = matrices.rotate_matrix(Angile);
 
-            eng->render_triangle(missile_box,
-                                 shoot_norm,
-                                 shoot_shift,
-                                 shoot_rotate,
-                                 eng->get_texture(9),
-                                 false);
-            eng->render_triangle(missile_box2,
-                                 shoot_norm,
-                                 shoot_shift,
-                                 shoot_rotate,
-                                 eng->get_texture(9),
-                                 false);
+            eng->render_triangle("missile",
+                shoot_norm,
+                shoot_shift,
+                shoot_rotate,
+                color,
+                eng->get_texture("missile"),
+                false);
 
             temp_missiles.push({ centerX, centerY, dx, dy, Angile });
         }
@@ -94,6 +90,34 @@ public:
                     float obj_y = objects[i].y * normolize_matrix[4] *
                                   scaling_coefficient;
 
+                    float obj_left_down_x = (obj_x - 0.1f * normolize_matrix[0]);
+                    float obj_left_down_y = (obj_y - 0.1f * normolize_matrix[4]);
+
+                    float obj_right_down_x = (obj_x + 0.1f * normolize_matrix[0]);
+
+                    float obj_right_up_y = (obj_y + 0.1f * normolize_matrix[4]);
+
+                    if (X >= obj_left_down_x &&
+                        X <= obj_right_down_x &&
+                        Y >= obj_left_down_y &&
+                        Y <= obj_right_up_y)
+                    {
+                        missile_collision = true;
+                        if (objects[i].change)
+                            objects[i].exist = false;
+                        if (objects[i].breakable)
+                            objects[i].change = true;
+
+                        anim.add_animation(X, Y, 1.5f);
+                        break;
+                    }
+
+
+                    /*float obj_x = objects[i].x * normolize_matrix[0] *
+                                  scaling_coefficient;
+                    float obj_y = objects[i].y * normolize_matrix[4] *
+                                  scaling_coefficient;
+
                     float DX       = (X - obj_x);
                     float DY       = (Y - obj_y);
                     float distance = sqrt(DX * DX + DY * DY);
@@ -109,7 +133,7 @@ public:
 
                         anim.add_animation(X, Y, 1.5f);
                         break;
-                    }
+                    }*/
                 }
             }
 
@@ -244,15 +268,5 @@ private:
     my_math        matrices;
     float          missile_speed = 25.f;
 
-    vector<float> missile_box = { -0.041f, -0.022f, 0.0f,   1.0f,    1.0f,
-                                  1.0f,    1.0f,    1.0f,   -0.041f, 0.022f,
-                                  0.0f,    1.0f,    1.0f,   1.0f,    0.0f,
-                                  1.0f,    0.041f,  0.022f, 0.0f,    1.0f,
-                                  1.0f,    1.0f,    0.0f,   0.0f };
-
-    vector<float> missile_box2 = { -0.041f, -0.022f, 0.0f,    1.0f,   1.0f,
-                                   1.0f,    1.0f,    1.0f,    0.041f, 0.022f,
-                                   0.0f,    1.0f,    1.0f,    1.0f,   0.0f,
-                                   0.0f,    0.041f,  -0.022f, 0.0f,   1.0f,
-                                   1.0f,    1.0f,    1.0f,    0.0f };
+    vector<float> color = { 1.0f, 1.0f, 1.0f ,1.0f };
 };

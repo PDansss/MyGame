@@ -29,18 +29,13 @@ public:
             unsigned int previos_time  = animation_stack.top().previos_time;
             float        scaling       = animation_stack.top().scale;
 
-            eng->render_triangle(animation_box,
-                                 matrices.shift_matrix(x, y),
-                                 matrices.scaling_matrix(scaling, scaling),
-                                 normolize_matrix,
-                                 eng->get_texture(current_frame),
-                                 false);
-            eng->render_triangle(animation_box2,
-                                 matrices.shift_matrix(x, y),
-                                 matrices.scaling_matrix(scaling, scaling),
-                                 normolize_matrix,
-                                 eng->get_texture(current_frame),
-                                 false);
+            eng->render_triangle("animation",
+                matrices.shift_matrix(x, y),
+                matrices.scaling_matrix(scaling, scaling),
+                normolize_matrix,
+                obstacle_color,
+                eng->get_texture(animation_frames[current_frame]),
+                false);
 
             current_time = eng->get_time();
             if (current_time - previos_time > time_between_frames)
@@ -59,15 +54,18 @@ public:
 
 private:
     stack<anim>   animation_stack;
-    unsigned int  current_time, time_between_frames = 45;
+    unsigned int  current_time = 0, time_between_frames = 45;
     my_math       matrices;
-    vector<float> animation_box = { -0.1f, 0.1f, 0.0f, 1.0f, 1.0f, 1.0f,
-                                    0.0f,  0.0f, 0.1f, 0.1f, 0.0f, 1.0f,
-                                    1.0f,  1.0f, 1.0f, 0.0f, 0.1f, -0.1f,
-                                    0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-    vector<float> animation_box2 = { -0.1f, 0.1f, 0.0f, 1.0f,  1.0f,  1.0f,
-                                     0.0f,  0.0f, 0.1f, -0.1f, 0.0f,  1.0f,
-                                     1.0f,  1.0f, 1.0f, 1.0f,  -0.1f, -0.1f,
-                                     0.0f,  1.0f, 1.0f, 1.0f,  0.0f,  1.0f };
+    vector<float> animation_vertex = { -0.1f,   0.1f,  0.0f, 0.0f, 0.0f, 
+                                        0.1f,   0.1f,  0.0f, 1.0f, 0.0f, 
+                                        0.1f,  -0.1f,  0.0f, 1.0f, 1.0f,
+                                        -0.1f, -0.1f,  0.0f, 0.0f, 1.0f };
+    
+    vector<unsigned int> animation_index = { 0,1,2,0,2,3 };
+
+    vector<float> obstacle_color = { 1.0f, 1.0f ,1.0f ,1.0f };
+
+    vector<string> animation_frames = { "explosion01" , "explosion02" , "explosion03" ,
+                                        "explosion04" , "explosion05" , "explosion06", "explosion07" };
 };
