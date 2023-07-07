@@ -280,56 +280,6 @@ public:
     }
     unsigned int get_texture(string texture) { return textures.at(texture); }
 
-    void render_triangle(vector<float> atribute_vertex,
-                         vector<float> normolize_matrix,
-                         vector<float> shift_matrix,
-                         vector<float> buffer_matrix,
-                         unsigned int  texture,
-                         bool          blending)
-    {
-        glUseProgram(main_program);
-        glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, 32, atribute_vertex.data());
-
-        glVertexAttribPointer(
-            1, 3, GL_FLOAT, GL_FALSE, 32, atribute_vertex.data() + 3);
-
-        glVertexAttribPointer(
-            2, 2, GL_FLOAT, GL_FALSE, 32, atribute_vertex.data() + 6);
-
-        glEnableVertexAttribArray(0);
-
-        glEnableVertexAttribArray(1);
-
-        glEnableVertexAttribArray(2);
-
-        glActiveTexture(GL_TEXTURE0);
-
-        glUniformMatrix3fv(
-            glGetUniformLocation(main_program, "normolize_matrix"),
-            1,
-            GL_TRUE,
-            normolize_matrix.data());
-        glUniformMatrix3fv(glGetUniformLocation(main_program, "shift_matrix"),
-                           1,
-                           GL_TRUE,
-                           shift_matrix.data());
-        glUniformMatrix3fv(glGetUniformLocation(main_program, "buffer_matrix"),
-                           1,
-                           GL_TRUE,
-                           buffer_matrix.data());
-
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        if (blending)
-        {
-            glEnable(GL_BLEND);
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-
     void render_triangle(string buffer,
                          vector<float> normolize_matrix,
                          vector<float> shift_matrix,

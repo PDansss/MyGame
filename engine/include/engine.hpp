@@ -26,13 +26,6 @@ public:
 
     virtual void display() = 0;
 
-    virtual void render_triangle(vector<float> atribute_vertex,
-                                 vector<float> normolize_matrix,
-                                 vector<float> shift_matrix,
-                                 vector<float> buffer_matrix,
-                                 unsigned int  texture,
-                                 bool          blending) = 0;
-
     virtual void render_triangle(string buffer,
                                  vector<float> normolize_matrix,
                                  vector<float> shift_matrix,
