@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+#include "my_math.hpp"
 #include "imgui.h"
 
 #pragma once
@@ -24,6 +25,7 @@ public:
     virtual ~IEngine()                                           = default;
 
     virtual void display() = 0;
+
     virtual void render_triangle(vector<float> atribute_vertex,
                                  vector<float> normolize_matrix,
                                  vector<float> shift_matrix,
@@ -38,6 +40,12 @@ public:
                                  vector<float> color,
                                  unsigned int  texture,
                                  bool          blending) = 0;
+
+    virtual void render_triangle(string buffer,
+                                 string buffer2,
+                                 int num, 
+                                 vector<float> normolize_matrix,
+                                 vector<float> shift_matrix) = 0;
    
     virtual void set_buffer(unsigned int buffer, vector<float> data)        = 0;
     virtual void set_buffer(unsigned int buffer, vector<unsigned int> data) = 0;

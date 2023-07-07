@@ -22,8 +22,8 @@ vector<float> animation_vertecies = {
 
 vector<float> obj_vertecies = { 
    -0.1f,  0.1f, 0.0f, 0.0f, 0.0f,
-       0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
-       0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
+    0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
+    0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
    -0.1f, -0.1f, 0.0f, 0.0f, 1.0f };
 
 vector<float>background_vertecies = { 
@@ -38,7 +38,7 @@ int main()
 {
     IEngine* myeng = create_engine();
 
-	int   width = 1900, height = 680;
+	int   width = 1920, height = 1080;
 
     float scale  = 0.4f;
 	float scaling_coff = 1 / scale;
@@ -47,15 +47,12 @@ int main()
     myeng->init(width, height,norm);
 
     myeng->set_buffer(myeng->get_vertex_buffer("tank"), tank_vertecies);
-    myeng->set_buffer(myeng->get_index_buffer("tank"), indexes);
     myeng->set_buffer(myeng->get_vertex_buffer("missile"), missile_vertecies);
-    myeng->set_buffer(myeng->get_index_buffer("missile"), indexes);
     myeng->set_buffer(myeng->get_vertex_buffer("animation"), animation_vertecies);
-    myeng->set_buffer(myeng->get_index_buffer("animation"), indexes);
     myeng->set_buffer(myeng->get_vertex_buffer("object"), obj_vertecies);
-    myeng->set_buffer(myeng->get_index_buffer("object"), indexes);
     myeng->set_buffer(myeng->get_vertex_buffer("background"), background_vertecies);
-    myeng->set_buffer(myeng->get_index_buffer("background"), indexes);
+	myeng->set_buffer(myeng->get_index_buffer("indexes"), indexes);
+	morphing::set_figure(myeng);
 
     vector<stack<missile>*> positions;
 

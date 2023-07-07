@@ -12,7 +12,7 @@ add_library(engine SHARED engine/include/engine.hpp  engine/include/my_audio.hpp
                           engine/glad/glad.h engine/KHR/khrplatform.h engine/ImGUI/imconfig.h engine/ImGUI/imgui.cpp
                           engine/ImGUI/imgui.h engine/ImGUI/imgui_demo.cpp engine/ImGUI/imgui_draw.cpp
                           engine/ImGUI/imgui_widgets.cpp engine/ImGUI/imstb_rectpack.h engine/ImGUI/imgui_internal.h
-                          engine/ImGUI/imgui_tables.cpp engine/ImGUI/imstb_textedit.h engine/ImGUI/imstb_truetype.h)
+                          engine/ImGUI/imgui_tables.cpp engine/ImGUI/imstb_textedit.h engine/ImGUI/imstb_truetype.h "game/morphing.hpp"  "game/animation.cpp" "game/missile.cpp")
 
 target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIRECTORY})
 target_include_directories(engine PUBLIC engine/include engine/glad engine/KHR engine/ImGUI)
@@ -20,7 +20,7 @@ target_compile_features(engine PUBLIC cxx_std_20)
 target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
 
 add_executable(game  game/game.cpp game/tank.cpp game/tank.hpp game/enemy.cpp
-                     game/object.hpp game/animation.hpp game/missile.hpp)
+                     game/object.hpp game/animation.hpp game/missile.hpp game/morphing.hpp "game/animation.cpp" "game/missile.cpp")
 target_compile_features(game PUBLIC cxx_std_20)
 target_link_libraries(game PRIVATE engine)
 

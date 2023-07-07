@@ -32,8 +32,6 @@ public:
 
     void render()
     {
-        // Draw platform
-
         engine->render_triangle(
             "tank",
             normolize_matrix,
@@ -52,7 +50,9 @@ public:
             engine->get_texture("tank_part_2"),
             true);
 
-        // Draw missile
+        if(isDead)
+            morphing::draw(engine, normolize_matrix, tank_x, tank_y);
+
 
         missiles.draw_missile(engine, normolize_matrix);
         explosion_animation.draw_animation(engine, normolize_matrix);
@@ -192,6 +192,7 @@ public:
                 set_color(enemy_color, obstacle_color, obstacle_color, obstacle_color);
             }
         }
+        
         missiles.update(engine,
                         objects,
                         normolize_matrix,
@@ -239,6 +240,7 @@ public:
         tank_x += dx;
         tank_y += dy;
     }
+    
     void restart()
     {
         tank_x     = start_x;
@@ -297,7 +299,7 @@ private:
     float         desired_base_angle              = 0.f;
     float         start_base_angle                = 0.f;
     float         t2                              = 0.f;
-    vector<float> angiles{ 0.f, 1.57f, 3.14f, 4.71f };
+    vector<float> angiles = { 0.f, 1.57f, 3.14f, 4.71f };
 
     float temp_ang;
 

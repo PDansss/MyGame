@@ -3,7 +3,6 @@
 
 #include "engine.hpp"
 #include "my_audio.hpp"
-#include "my_math.hpp"
 #include "picopng.hpp"
 
 #ifdef _WIN32
@@ -39,7 +38,7 @@ public:
 
         window = SDL_CreateWindow("TANKS", width, height, SDL_WINDOW_OPENGL);
 
-        //SDL_SetWindowFullscreen(window, SDL_TRUE);
+        SDL_SetWindowFullscreen(window, SDL_TRUE);
 		
         SDL_GetWindowSizeInPixels(window, &width_in_pixels, &height_in_pixels);
        
@@ -70,11 +69,14 @@ public:
 
         glViewport(0, 0, width_in_pixels, height_in_pixels);
 
-        main_program = set_program("./res/shaders/vertex_shader2.txt",
-                                   "./res/shaders/fragment_shader2.txt");
+        main_program = set_program("./res/shaders/main_vertex_shader.txt",
+                                   "./res/shaders/main_fragment_shader.txt");
 
         imgui_program = set_program("./res/shaders/imgui_vertex_shader.txt",
                                     "./res/shaders/imgui_fragment_shader.txt");
+
+        morphing_program = set_program("./res/shaders/morphing_vertex_shader.txt",
+                                       "./res/shaders/morphing_fragment_shader.txt");
 
         SDL_AudioSpec device_info, want;
 
@@ -107,11 +109,17 @@ public:
         set_texture("res/textures/background.png"  , textures.at("background"));
         set_texture("res/textures/arrow.png"       , textures.at("arrow"));
 
-        gen_buffers(vertex_buffers.at("tank"), index_buffers.at("tank"));
-        gen_buffers(vertex_buffers.at("missile"), index_buffers.at("missile"));
-        gen_buffers(vertex_buffers.at("animation"), index_buffers.at("animation"));
-        gen_buffers(vertex_buffers.at("object"), index_buffers.at("object"));
-        gen_buffers(vertex_buffers.at("background"), index_buffers.at("background"));
+        gen_buffers(vertex_buffers.at("tank"));
+        gen_buffers(vertex_buffers.at("missile"));
+        gen_buffers(vertex_buffers.at("animation"));
+        gen_buffers(vertex_buffers.at("object"));
+        gen_buffers(vertex_buffers.at("background"));
+        gen_buffers(vertex_buffers.at("arrow"));
+        gen_buffers(vertex_buffers.at("figure1"));
+        gen_buffers(vertex_buffers.at("figure2"));
+        gen_buffers(index_buffers.at("indexes"));
+
+        set_buffer(get_vertex_buffer("arrow"), arrows_vertecies);
 
         my_audio::sounds.push_back(&menu);
         my_audio::sounds.push_back(&fon);
@@ -217,19 +225,29 @@ public:
     void clean()
     {
         shitdown_gui();
-        delete_buffers(vertex_buffers.at("tank"), index_buffers.at("tank"));
-        delete_buffers(vertex_buffers.at("missile"), index_buffers.at("missile"));
-        delete_buffers(vertex_buffers.at("animation"), index_buffers.at("animation"));
-        delete_buffers(vertex_buffers.at("object"), index_buffers.at("object"));
-        delete_buffers(vertex_buffers.at("background"), index_buffers.at("background"));     
+
+        delete_buffers(vertex_buffers.at("tank"));
+        delete_buffers(vertex_buffers.at("missile"));
+        delete_buffers(vertex_buffers.at("animation"));
+        delete_buffers(vertex_buffers.at("object"));
+        delete_buffers(vertex_buffers.at("background")); 
+        delete_buffers(vertex_buffers.at("arrow"));
+        delete_buffers(vertex_buffers.at("figure1"));
+        delete_buffers(vertex_buffers.at("figure2"));
+        delete_buffers(index_buffers.at("indexes"));
+
         texture_clean();
+
         SDL_free(shoot.audio_buffer);
         SDL_free(fon.audio_buffer);
         SDL_free(menu.audio_buffer);
         SDL_PauseAudioDevice(device);
         SDL_CloseAudioDevice(device);
+
         glDeleteProgram(main_program);
         glDeleteProgram(imgui_program);
+        glDeleteProgram(morphing_program);
+
         SDL_DestroyWindow(window);
         SDL_Quit();
         cout << "Engine was cleaned!\n";
@@ -244,6 +262,7 @@ public:
         check_gl_errors();
 
     }
+    
     void set_buffer(unsigned int buffer, vector<unsigned int> data) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
         check_gl_errors();
@@ -318,9 +337,9 @@ public:
                          vector<float> obstacle_color,
                          unsigned int  texture,
                          bool          blending) {
-
+        glUseProgram(main_program);
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers.at(buffer));
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffers.at(buffer));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_index_buffer("indexes"));
 
         glUseProgram(main_program);
 
@@ -365,12 +384,60 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
+    void render_triangle(string buffer,
+                         string buffer2,
+                         int num,
+                         vector<float> normolize_matrix,
+                         vector<float> shift_matrix) {
+
+        glUseProgram(morphing_program);
+
+        glUniformMatrix3fv(glGetUniformLocation(morphing_program, "norm_matrix"),
+            1,
+            GL_TRUE,
+            normolize_matrix.data());
+
+        glUniformMatrix3fv(glGetUniformLocation(morphing_program, "shift_matrix"),
+            1,
+            GL_TRUE,
+            shift_matrix.data());
+
+        glUniform1f(glGetUniformLocation(morphing_program, "theta"), sin(get_time() * 0.007));
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers.at(buffer));
+        glVertexAttribPointer(
+            0, 3, GL_FLOAT, GL_FALSE, 24, 0);
+        check_gl_errors();
+        glVertexAttribPointer(
+            1, 3, GL_FLOAT, GL_FALSE, 24, (void*)(3 * sizeof(float)));
+        check_gl_errors();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers.at(buffer2));
+        glVertexAttribPointer(
+            2, 3, GL_FLOAT, GL_FALSE, 24, 0);
+        check_gl_errors();
+        glVertexAttribPointer(
+            3, 3, GL_FLOAT, GL_FALSE, 24, (void*)(3 * sizeof(float)));
+        check_gl_errors();
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glEnableVertexAttribArray(0);
+        check_gl_errors();
+        glEnableVertexAttribArray(1);
+        check_gl_errors();
+        glEnableVertexAttribArray(2);
+        check_gl_errors();
+        glEnableVertexAttribArray(3);
+        check_gl_errors();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, num);
+        check_gl_errors();
+    }
 
     void display()
     {
         ImGui::Render();
         DearImGUI_Render(ImGui::GetDrawData());
-        //draw_control_arrows();
+        draw_control_arrows();
         SDL_GL_SwapWindow(window);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -705,26 +772,30 @@ private:
                                         { "S", 0 },           { "D", 0 },
                                         { "MOUSE_WHEEL", 0 }, { "MOUSE_CLICK", 0 } };
 
-    unordered_map<string, unsigned int> textures{{ "explosion01", 0 }, { "explosion02", 0 },
+    unordered_map<string, unsigned int> textures{{ "explosion01",0 } , { "explosion02", 0 },
                                                 { "explosion03", 0 } , { "explosion04", 0 },
                                                 { "explosion05", 0 } , { "explosion06", 0 },
                                                 { "explosion07", 0 } , { "tank_part_1", 0 },
                                                 { "tank_part_2", 0 } , { "missile"    , 0 },
                                                 { "brick_wall" , 0 } , { "broken_wall", 0 },
-                                                { "stone_wall" , 0 } , { "background", 0 },
+                                                { "stone_wall" , 0 } , { "background", 0  },
                                                 { "arrow",       0 }};
 
-    unordered_map<string, unsigned int> vertex_buffers{ {"tank",0}, {"missile",0}, {"animation",0},{"object",0}, {"background",0} };
-    unordered_map<string, unsigned int> index_buffers { {"tank",0}, {"missile",0}, {"animation",0},{"object",0}, {"background",0} };
+    unordered_map<string, unsigned int> vertex_buffers{ {"tank"      ,0}, {"missile",0},
+                                                        {"animation" ,0}, {"object" ,0},
+                                                        {"background",0}, {"arrow"  ,0 },
+                                                        {"figure1"   ,0}, {"figure2",0} };
+
+    unordered_map<string, unsigned int> index_buffers{ { "indexes",0 } };
+
+    vector<float> arrows_vertecies = {
+        0.0f,                    0.0f,                     0.0f, 0.0f, 0.0f,
+        width_in_pixels * 0.15f, 0.0f,                     0.0f, 1.0f, 0.0f,
+        width_in_pixels * 0.15f, height_in_pixels * 0.15f, 0.0f, 1.0f, 1.0f,
+        0.0f,                    height_in_pixels * 0.15f, 0.0f, 0.0f, 1.0f };
 
 
-    vector<float> arrows_box = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-                                 width_in_pixels * 0.15f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-                                 width_in_pixels * 0.15f, height_in_pixels * 0.15f,0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
-
-    vector<float> arrows_box2 = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-                                 0.0f, height_in_pixels * 0.15f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-                                 width_in_pixels * 0.15f, height_in_pixels * 0.15f,0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    vector<float> arrow_color = { 1.0f,1.0f,1.0f,0.5f };
 
     my_math math;
 
@@ -732,6 +803,7 @@ private:
 
     GLuint main_program;
     GLuint imgui_program;
+    GLuint morphing_program;
 
     my_audio::my_audio shoot;
     my_audio::my_audio fon;
@@ -874,70 +946,44 @@ private:
 
         vector<float> m = math.matrix_multiplying(math.rotate_matrix(3.14), math.shift_matrix(-1.0f, 1.0f));
 
-        render_triangle(arrows_box,
+        render_triangle(
+            "arrow",
             m,
             math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
             math.shift_matrix(width_in_pixels * 0.83f, height_in_pixels * 0.2f),
-            get_texture("arrow"),
-            false);
-        render_triangle(arrows_box2,
-            m,
-            math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
-            math.shift_matrix(width_in_pixels * 0.83f, height_in_pixels * 0.2f),
+            arrow_color,
             get_texture("arrow"),
             false);
 
-
-        render_triangle(arrows_box,
+        render_triangle("arrow",
             m,
             math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
             math.shift_matrix(width_in_pixels * 0.05f, height_in_pixels * 0.2f),
-            get_texture("arrow"),
-            false);
-        render_triangle(arrows_box2,
-            m,
-            math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
-            math.shift_matrix(width_in_pixels * 0.05f, height_in_pixels * 0.2f),
+            arrow_color,
             get_texture("arrow"),
             false);
 
-
-        m = math.matrix_multiplying(math.shift_matrix(-1.0f, 1.0f),math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels));
-        render_triangle(arrows_box,
+        m = math.matrix_multiplying(math.shift_matrix(-1.0f, 1.0f), math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels));
+        render_triangle("arrow",
             m,
             math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.02f, height_in_pixels * 0.2f),
-            get_texture("arrow"),
-            false);
-        render_triangle(arrows_box2,
-            m,
-            math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.02f, height_in_pixels * 0.2f),
+            math.shift_matrix(width_in_pixels * 0.02f, height_in_pixels * 0.2f), arrow_color,
             get_texture("arrow"),
             false);
 
-        render_triangle(arrows_box,
+        render_triangle("arrow",
             m,
             math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.80f, height_in_pixels * 0.2f),
-            get_texture("arrow"),
-            false);
-        render_triangle(arrows_box2,
-            m,
-            math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.80f, height_in_pixels * 0.2f),
+            math.shift_matrix(width_in_pixels * 0.80f, height_in_pixels * 0.2f), arrow_color,
             get_texture("arrow"),
             false);
     }
 
-    void gen_buffers(unsigned int& vertex_handel, unsigned int& index_handel) {
-        glGenBuffers(1, &vertex_handel);
-        glGenBuffers(1, &index_handel);
+    void gen_buffers(unsigned int& buffer_handel) {
+        glGenBuffers(1, &buffer_handel);
     }
-
-    void delete_buffers(unsigned int& vertex_handel, unsigned int& index_handel) {
-        glDeleteBuffers(1, &vertex_handel);
-        glDeleteBuffers(1, &index_handel);
+    void delete_buffers(unsigned int& buffer_handel) {
+        glDeleteBuffers(1, &buffer_handel);
     }
 };
 
