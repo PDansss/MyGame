@@ -2,14 +2,14 @@
 precision mediump float;
 
 layout (location = 0) in vec4 figure1_Pos;
-layout (location = 1) in vec4 figure1_color;
-layout (location = 2) in vec2 TexPosition;
+layout (location = 1) in vec2 TexPosition;
 
 //uniform mat3 matrix;
 
 uniform mat3 normolize_matrix;
 uniform mat3 shift_matrix;
 uniform mat3 buffer_matrix;
+uniform vec4 figure1_color;
 
 out vec2 TexCoord;
 out vec4 _color;

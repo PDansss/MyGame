@@ -1,0 +1,24 @@
+#version 300 es
+precision mediump float;
+
+layout (location = 0) in vec4 figure1_Pos;
+layout (location = 1) in vec2 TexPosition;
+
+//uniform mat3 matrix;
+
+uniform mat3 normolize_matrix;
+uniform mat3 shift_matrix;
+uniform mat3 buffer_matrix;
+uniform vec4 figure1_color;
+
+out vec2 TexCoord;
+out vec4 _color;
+mat3 matrix;
+
+void main(){
+    matrix = normolize_matrix * shift_matrix * 	buffer_matrix;
+    vec3 changed = matrix * vec3(figure1_Pos.x,figure1_Pos.y,1.0f);
+    gl_Position = vec4(changed,1.0f);
+    _color = figure1_color;
+    TexCoord = TexPosition;
+}
