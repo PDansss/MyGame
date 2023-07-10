@@ -1,50 +1,49 @@
 #include "engine.hpp"
 #include "tank.hpp"
 
-vector<float> tank_vertecies = {
+const vector<float> tank_vertecies = {
    -0.2f,  0.1f, 0.0f, 0.0f, 1.0f,
     0.2f,  0.1f, 0.0f, 0.0f, 0.0f,
     0.2f, -0.1f, 0.0f, 1.0f, 0.0f,
    -0.2f, -0.1f, 0.0f, 1.0f, 1.0f
 };
 
-vector<float> missile_vertecies = { 
+const vector<float> missile_vertecies = {
    -0.041f, -0.022f, 1.0f, 1.0f, 1.0f,
    -0.041f,  0.022f, 1.0f, 0.0f, 1.0f,
     0.041f,  0.022f, 1.0f, 0.0f, 0.0f,
     0.041f, -0.022f, 1.0f, 1.0f, 0.0f };
 
-vector<float> animation_vertecies = { 
+const vector<float> animation_vertecies = {
    -0.1f,  0.1f, 0.0f, 0.0f, 0.0f,
     0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
     0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
    -0.1f, -0.1f, 0.0f, 0.0f, 1.0f };
 
-vector<float> obj_vertecies = { 
+const vector<float> obj_vertecies = {
    -0.1f,  0.1f, 0.0f, 0.0f, 0.0f,
     0.1f,  0.1f, 0.0f, 1.0f, 0.0f,
     0.1f, -0.1f, 0.0f, 1.0f, 1.0f,
    -0.1f, -0.1f, 0.0f, 0.0f, 1.0f };
 
-vector<float>background_vertecies = { 
+const vector<float> background_vertecies = {
    -1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
     1.0f,  1.0f, 0.0f, 1.0f, 0.0f,
     1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f };
 
-vector<unsigned int> indexes = { 0,1,2,0,2,3 };
+const vector<unsigned int> indexes = { 0,1,2,0,2,3 };
 
 int main()
 {
+	const int  width = 1920, height = 1080;
+	const float scale = 0.4f;
+	const float scaling_coff = 1 / scale;
+
     IEngine* myeng = create_engine();
 
-	int   width = 1920, height = 1080;
-
-    float scale  = 0.4f;
-	float scaling_coff = 1 / scale;
-
 	vector<float> norm;
-    myeng->init(width, height,norm);
+    myeng->init(width, height,norm, scale);
 
     myeng->set_buffer(myeng->get_vertex_buffer("tank"), tank_vertecies);
     myeng->set_buffer(myeng->get_vertex_buffer("missile"), missile_vertecies);
@@ -58,19 +57,19 @@ int main()
 
     int score = 0;
 
-    ITank* player = create_tank(myeng, 1.7f, 1.8f, 0.f, 0.f, norm, scaling_coff);
+    ITank* player = create_tank(myeng, 1.0f, 0.9f, 1.57f, norm, scaling_coff);
 
     ITank* enemy1 = create_enemy_tank(
-        myeng, player, -0.5f, -0.3f, 0.f, 0.f, norm, scaling_coff, &score);
+        myeng, player, -0.5f, -0.3f, 0.f, norm, scaling_coff, &score);
 
     ITank* enemy2 = create_enemy_tank(
-        myeng, player, 0.5f, -0.8f, 0.f, 0.f, norm, scaling_coff, &score);
+        myeng, player, 0.3f, -0.8f, 0.f, norm, scaling_coff, &score);
 
     ITank* enemy3 = create_enemy_tank(
-        myeng, player, -0.5f, 0.3f, 0.f, 0.f, norm, scaling_coff, &score);
+        myeng, player, -0.8f, 0.3f, 0.f, norm, scaling_coff, &score);
 
     ITank* enemy4 = create_enemy_tank(
-        myeng, player, 0.5f, -0.4f, 0.f, 0.f, norm, scaling_coff, &score);
+        myeng, player, 0.5f, -0.4f, 0.f, norm, scaling_coff, &score);
 
     positions.push_back(enemy1->get_missile_stack());
     positions.push_back(enemy2->get_missile_stack());
@@ -93,9 +92,13 @@ int main()
 			if (!myeng->read_events() || exit)
 				break;
 
+			obs.render();
 			if (show_main_menu)
 			{
 				myeng->draw_main_menu(show_main_menu, exit);
+				if (!show_main_menu) {
+					obs.set_obstacle("res/level.txt");
+				}
 				enemy1->restart();
 				enemy2->restart();
 				enemy3->restart();
@@ -123,7 +126,6 @@ int main()
 				}
 
 				myeng->draw_pause_menu(pause, show_main_menu);
-				obs.render();
 				enemy1->render();
 				enemy2->render();
 				enemy3->render();

@@ -17,7 +17,7 @@ using namespace std;
 class ENGSPEC IEngine
 {
 public:
-    virtual void         init(int x, int y, vector<float>& norm) = 0;
+    virtual void         init(int x, int y, vector<float>& norm, float scale) = 0;
     virtual bool         read_events()                           = 0;
     virtual int          check_button(string button)             = 0;
     virtual unsigned int get_time()                              = 0;
@@ -39,6 +39,12 @@ public:
                                  int num, 
                                  vector<float> normolize_matrix,
                                  vector<float> shift_matrix) = 0;
+
+    virtual void render_line(vector<float> attributes, 
+                             vector<float> normolize_matrix,
+                             vector<float> shift_matrix,
+                             vector<float> buffer_matrix, 
+                             vector<unsigned int> ind) = 0;
    
     virtual void set_buffer(unsigned int buffer, vector<float> data)        = 0;
     virtual void set_buffer(unsigned int buffer, vector<unsigned int> data) = 0;

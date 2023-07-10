@@ -29,8 +29,7 @@ public:
 ITank* create_tank(IEngine*      eng,
                    float         x,
                    float         y,
-                   float         ang_base,
-                   float         turret_ang,
+                   float         angle,
                    vector<float> norm,
                    float         coeff);
 
@@ -38,8 +37,7 @@ ITank* create_enemy_tank(IEngine*      eng,
                          ITank*        tank,
                          float         x,
                          float         y,
-                         float         ang_base,
-                         float         turret_ang,
+                         float         angle,
                          vector<float> norm,
                          float         coeff,
                          int*          score_);

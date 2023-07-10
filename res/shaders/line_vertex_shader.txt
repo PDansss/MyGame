@@ -1,0 +1,19 @@
+#version 300 es
+precision mediump float;
+
+layout (location = 0) in vec4 line_position;
+layout (location = 1) in vec4 line_color;
+
+uniform mat3 normolize_matrix;
+uniform mat3 shift_matrix;
+uniform mat3 buffer_matrix;
+
+out vec4 _color;
+mat3 matrix;
+
+void main(){
+    matrix = normolize_matrix * shift_matrix * 	buffer_matrix;
+    vec3 changed = matrix * vec3(line_position.x,line_position.y,1.0f);
+    gl_Position = vec4(changed,1.0f);
+    _color = line_color;
+}

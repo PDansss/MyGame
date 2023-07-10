@@ -21,7 +21,8 @@ target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
 
 add_executable(game  game/src/game.cpp game/src/tank.cpp game/include/tank.hpp game/src/enemy.cpp
                      game/include/object.hpp game/include/animation.hpp game/include/missile.hpp 
-                     game/include/morphing.hpp game/src/animation.cpp game/src/missile.cpp)
+                     game/include/morphing.hpp game/src/animation.cpp game/src/missile.cpp game/src/object.cpp)
+
 target_include_directories(game PUBLIC game/include)
 target_compile_features(game PUBLIC cxx_std_20)
 target_link_libraries(game PRIVATE engine)

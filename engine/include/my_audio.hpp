@@ -1,7 +1,8 @@
-#include <SDL3/SDL.h>
 #include <cstring>
 #include <iostream>
 #include <vector>
+
+#include <SDL3/SDL.h>
 
 #pragma once
 
@@ -24,7 +25,7 @@ struct my_audio
         wav.silence  = 0;
         wav.userdata = this;
 
-        if (SDL_LoadWAV(path, &wav, &audio_buffer, &buffer_len) == NULL)
+        if (SDL_LoadWAV_RW(SDL_RWFromFile(path, "rb"), 1, &wav, &audio_buffer, &buffer_len) == NULL)
         {
             cout << "I can't load WAV file!" << endl;
         }

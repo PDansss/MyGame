@@ -27,7 +27,7 @@ void* load_opengl_func(const char* name)
 class engine : public IEngine
 {
 public:
-    void init(int x, int y, vector<float>& norm)
+    void init(int x, int y, vector<float>& norm, float scale)
     {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
         {
@@ -42,7 +42,7 @@ public:
 		
         SDL_GetWindowSizeInPixels(window, &width_in_pixels, &height_in_pixels);
        
-		norm = math.matrix_multiplying(math.scaling_matrix((float)height_in_pixels/(float)width_in_pixels, 1), math.scaling_matrix(0.4f, 0.4f));
+		norm = math.matrix_multiplying(math.scaling_matrix((float)height_in_pixels/(float)width_in_pixels, 1), math.scaling_matrix(scale, scale));
 
         if (window == nullptr)
         {
@@ -77,6 +77,9 @@ public:
 
         morphing_program = set_program("./res/shaders/morphing_vertex_shader.txt",
                                        "./res/shaders/morphing_fragment_shader.txt");
+
+        line_program = set_program("./res/shaders/line_vertex_shader.txt",
+                                   "./res/shaders/line_fragment_shader.txt");
 
         SDL_AudioSpec device_info, want;
 
@@ -247,6 +250,7 @@ public:
         glDeleteProgram(main_program);
         glDeleteProgram(imgui_program);
         glDeleteProgram(morphing_program);
+        glDeleteProgram(line_program);
 
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -383,11 +387,49 @@ public:
         check_gl_errors();
     }
 
+    
+    void render_line(vector<float> attributes,
+                     vector<float> normolize_matrix,
+                     vector<float> shift_matrix,
+                     vector<float> buffer_matrix,
+                     vector<unsigned int> ind) {
+        glUseProgram(line_program);
+        check_gl_errors();
+        glUniformMatrix3fv(
+            glGetUniformLocation(line_program, "normolize_matrix"),
+            1,
+            GL_TRUE,
+            normolize_matrix.data());
+        check_gl_errors();
+        glUniformMatrix3fv(glGetUniformLocation(line_program, "shift_matrix"),
+            1,
+            GL_TRUE,
+            shift_matrix.data());
+        check_gl_errors();
+        glUniformMatrix3fv(glGetUniformLocation(line_program, "buffer_matrix"),
+            1,
+            GL_TRUE,
+            buffer_matrix.data());
+        check_gl_errors();
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, attributes.data());
+        check_gl_errors();
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, attributes.data() + 3);
+
+        check_gl_errors();
+        glEnableVertexAttribArray(0);
+        check_gl_errors();
+        glEnableVertexAttribArray(1);
+        check_gl_errors();
+
+        check_gl_errors();
+        glDrawElements(GL_LINE_STRIP, ind.size(), GL_UNSIGNED_INT, ind.data());
+    }
+
     void display()
     {
         ImGui::Render();
         DearImGUI_Render(ImGui::GetDrawData());
-        draw_control_arrows();
+        //draw_control_arrows();
         SDL_GL_SwapWindow(window);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -754,6 +796,7 @@ private:
     GLuint main_program;
     GLuint imgui_program;
     GLuint morphing_program;
+    GLuint line_program;
 
     my_audio::my_audio shoot;
     my_audio::my_audio fon;
@@ -765,20 +808,17 @@ private:
 
     string get_source(const char* filename)
     {
-        string   source;
-        ifstream input_shader_src(filename);
-        if (input_shader_src.good())
-        {
-            input_shader_src.seekg(0, ios::beg);
-            source.assign(istreambuf_iterator<char>(input_shader_src),
-                          istreambuf_iterator<char>());
+        SDL_RWops* src = SDL_RWFromFile(filename, "r");
+        if (src != NULL) {
+            unsigned int size = SDL_RWsize(src);
+            char* code = new char[size + 1];
+            size_t bytesRead = SDL_RWread(src, code, size);
+            code[size] = '\0';
+            string source(code);
+            delete[] code;
             return source;
         }
-        else
-        {
-            cerr << "Something wrong with this file " << filename << ": " << strerror(errno) << endl;
-            return "";
-        }
+        return "";
     }
 
     GLuint load_shader(GLenum shader_type, const char* file)
@@ -842,21 +882,18 @@ private:
 
     void set_texture(const char* path, unsigned int& handle)
     {
+        SDL_RWops* src = SDL_RWFromFile(path, "rb");
         vector<byte> info;
-        ifstream     png_file(path, ios_base::binary);
         GLuint       texture_handle;
-        if (png_file.good())
-        {
-            png_file.seekg(0, ios_base::end);
-            int end_file = png_file.tellg();
-            png_file.seekg(0, ios_base::beg);
-            info.resize(end_file);
-            png_file.read(reinterpret_cast<char*>(info.data()),
-                static_cast<streamsize>(info.size()));
+
+        if (src != NULL) {
+            unsigned int size = SDL_RWsize(src);
+            info.resize(size);
+            size_t bytesRead = SDL_RWread(src, info.data(), size);
         }
         else
         {
-            cerr << "Something wrong with this file: " << path << ": " << strerror(errno) << endl;
+            cerr << "Something wrong with this file: " << path << ": " << endl;
             return;
         }
 

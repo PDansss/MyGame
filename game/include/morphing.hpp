@@ -43,6 +43,7 @@ namespace morphing{
             theta = (i + 1) * (2 * pi / number_of_vertecies);
             x = radius * cos(theta);
             y = radius * sin(theta);
+
             circle_vertexes.push_back(x);
             circle_vertexes.push_back(y);
             circle_vertexes.push_back(1.f);
@@ -60,6 +61,7 @@ namespace morphing{
         astroid_vertexes.push_back(0.5f);
         astroid_vertexes.push_back(0.5f);
         astroid_vertexes.push_back(0.5f);
+
         for (int i = 1; i < number_of_vertecies; i += 2)
         {
             float theta = (i - 1) * (2 * pi / number_of_vertecies);

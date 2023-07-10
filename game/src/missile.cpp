@@ -35,6 +35,7 @@ void Missile::draw_missile(IEngine* eng, vector<float> normolize_matrix)
         temp_missiles.push({ centerX, centerY, dx, dy, Angile });
     }
 
+
     missiles = temp_missiles;
 }
 
@@ -67,10 +68,8 @@ void Missile::update(IEngine* eng, vector<obstacle>& objects, vector<float> norm
         {
             if (objects[i].exist)
             {
-                float obj_x = objects[i].x * normolize_matrix[0] *
-                    scaling_coefficient;
-                float obj_y = objects[i].y * normolize_matrix[4] *
-                    scaling_coefficient;
+                float obj_x = objects[i].x * normolize_matrix[0];
+                float obj_y = objects[i].y * normolize_matrix[4];
 
                 float obj_left_down_x = (obj_x - 0.1f * normolize_matrix[0]);
                 float obj_left_down_y = (obj_y - 0.1f * normolize_matrix[4]);
