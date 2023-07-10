@@ -51,7 +51,7 @@ public:
             engine->get_texture("tank_part_2"),
             true);
 
-        engine->render_line(attr, matrices.single_matrix(), matrices.single_matrix(), matrices.single_matrix(), ind);
+        //engine->render_line(attr, matrices.single_matrix(), matrices.single_matrix(), matrices.single_matrix(), ind);
 
         if(draw_figure)
             morphing::draw(engine, normolize_matrix, tank_x, tank_y);
@@ -74,7 +74,7 @@ public:
 
             if (time - previos_intrepolation_base_time > (unsigned int)(rand() % 5000 + 2500) && !have_obstacle)
             {
-                int random         = rand() % 7;
+                int random         = rand() % 3;
                 base_angle = angiles[random];
 
                 float dX = cos(base_angle) * tank_speed;
@@ -216,7 +216,7 @@ public:
 
         float distance = sqrt(dx * dx + dy * dy);
 
-        if (distance < field_of_view * normolize_matrix[0] * scale_coefficient)
+        if (distance < field_of_view * (1 / scale_coefficient))
         {
             angle = atan2(player_y - enemy_y, player_x - enemy_x);
         }
@@ -297,8 +297,9 @@ private:
     unsigned int  previos_intrepolation_base_time = 0;
     float         start_base_angle                = 0.f;
 
-    vector<float> angiles = { 0.f,0.79f, 1.57f, 2.36f, 3.14f, 3.93f, 4.71f,5.5f };
-  
+    //vector<float> angiles = { 0.f,0.79f, 1.57f, 2.36f, 3.14f, 3.93f, 4.71f,5.5f };
+
+    vector<float> angiles = { 0.f, 1.57f, 3.14f, 4.71f};
     float temp_ang;
 
     vector<float> enemy_color = { 1.0f,1.0f,1.0f,1.0f };
@@ -381,10 +382,10 @@ private:
                                  right_up_x,  right_up_y,   x,
                                  y,           _x,           _y };
 
-        attr = { left_down_x , left_down_y, 1,1,0,1,
-                 left_up_x   , left_up_y,   1,1,0,1,
-                 right_down_x, right_down_y,1,1,0,1,
-                 right_up_x  , right_up_y,  1,1,0,1 };
+//        attr = { left_down_x , left_down_y, 1,1,0,1,
+//                 left_up_x   , left_up_y,   1,1,0,1,
+//                 right_down_x, right_down_y,1,1,0,1,
+//                 right_up_x  , right_up_y,  1,1,0,1 };
 
         return hitbox;
     }

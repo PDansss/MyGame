@@ -42,8 +42,11 @@ public:
         {
             throw runtime_error("Could not initialize!");
         }
-        width  = x;
-        height = y;
+
+        const SDL_DisplayMode* DM = SDL_GetCurrentDisplayMode(1);
+
+        width  = DM->w;
+        height = DM->h;
 
         window = SDL_CreateWindow("TANKS", width, height, SDL_WINDOW_OPENGL);
 
@@ -58,7 +61,6 @@ public:
             throw runtime_error("Сould not create a window!");
         }
         cout << "Engine was initialized!\n";
-        logToLogcat( "Engine was initialized!");
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,  OPENGL_CONTEXT);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VERSION);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, OPENGL_MINOR_VERSION);
@@ -69,13 +71,11 @@ public:
         {
             throw runtime_error("Engine could not create OpenGL ES context!");
         }
-        logToLogcat( "Create OpenGL ES context!");
         if (!gladLoadGLES2Loader(load_opengl_func))
         {
             throw runtime_error(
                 "Engine could not initialize OpenGL ES functions!");
         }
-        logToLogcat( "Functions loaded!");
         glViewport(0, 0, width, height);
 
         main_program = set_program("res/shaders/main_vertex_shader.txt",
@@ -90,7 +90,6 @@ public:
         line_program = set_program("res/shaders/line_vertex_shader.txt",
                                    "res/shaders/line_fragment_shader.txt");
 
-        logToLogcat( "Program created!");
         SDL_AudioSpec device_info, want;
 
         want.freq     = 44100;
@@ -105,7 +104,7 @@ public:
         shoot.set_data("res/music/shot.wav", device_info, false);
         fon.set_data("res/music/game_music.wav", device_info, true);
         menu.set_data("res/music/menu_music.wav", device_info, true);
-        logToLogcat( "Music loaded!");
+
         set_texture("res/textures/explosion/01.png", textures.at("explosion01"));
         set_texture("res/textures/explosion/02.png", textures.at("explosion02"));
         set_texture("res/textures/explosion/03.png", textures.at("explosion03"));
@@ -120,8 +119,9 @@ public:
         set_texture("res/textures/broken_wall.png" , textures.at("broken_wall"));
         set_texture("res/textures/stone_wall.png"  , textures.at("stone_wall"));
         set_texture("res/textures/background.png"  , textures.at("background"));
-        set_texture("res/textures/arrow.png"       , textures.at("arrow"));
-        logToLogcat( "Texture loaded!");
+        set_texture("res/textures/arrow.png"       , textures.at("arrow_up"));
+        set_texture("res/textures/arrow_down.png"  , textures.at("arrow_down"));
+
         gen_buffers(vertex_buffers.at("tank"));
         gen_buffers(vertex_buffers.at("missile"));
         gen_buffers(vertex_buffers.at("animation"));
@@ -131,7 +131,7 @@ public:
         gen_buffers(vertex_buffers.at("figure1"));
         gen_buffers(vertex_buffers.at("figure2"));
         gen_buffers(index_buffers.at("indexes"));
-        logToLogcat( "Buffers created!");
+
         set_buffer(get_vertex_buffer("arrow"), arrows_vertecies);
 
         my_audio::sounds.push_back(&menu);
@@ -158,37 +158,33 @@ public:
             }
 
 #ifdef __ANDROID__
-            if (Event.type == SDL_EVENT_FINGER_UP)
-            {
-                buttons.at("MOUSE_UP") = 1;
-            }
             if (Event.type == SDL_EVENT_FINGER_DOWN)
             {
-                if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.17 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.17 - width_in_pixels * 0.15 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.8 &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.8 - height_in_pixels * 0.15) {
+                if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.05 &&
+                    Event.tfinger.x * width_in_pixels < width_in_pixels * 0.05 + width_in_pixels * 0.15 &&
+                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.6 &&
+                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.6 + height_in_pixels * 0.15) {
                     buttons.at("S") = 1;
                     left_down_arrow_color[3] = 0.6f;
                 }
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.95 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.95 - width_in_pixels * 0.15 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.8 &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.8 - height_in_pixels * 0.15) {
+                else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8 &&
+                    Event.tfinger.x * width_in_pixels < width_in_pixels * 0.8 + width_in_pixels * 0.15 &&
+                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.6 &&
+                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.6 + height_in_pixels * 0.15) {
                     buttons.at("D") = 1;
                     right_down_arrow_color[3] = 0.6f;
                 }
 
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.02f + width_in_pixels * 0.15 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.02f &&
+                else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.05 &&
+                    Event.tfinger.x * width_in_pixels < width_in_pixels * 0.05 + width_in_pixels * 0.15 &&
                     Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
                     Event.tfinger.y * height_in_pixels < height_in_pixels * 0.2 + height_in_pixels * 0.15) {
                     buttons.at("W") = 1;
                     left_up_arrow_color[3] = 0.6f;
                 }
 
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.8f + width_in_pixels * 0.15 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8f &&
+                else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8f &&
+                    Event.tfinger.x * width_in_pixels < width_in_pixels * 0.8f + width_in_pixels * 0.15 &&
                     Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
                     Event.tfinger.y * height_in_pixels < height_in_pixels * 0.2 + height_in_pixels * 0.15) {
                     buttons.at("A") = 1;
@@ -197,45 +193,48 @@ public:
                 else
                     buttons.at("MOUSE_CLICK") = 1;
             }
-            if (Event.type == SDL_EVENT_FINGER_UP)
-            {
-                if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.17 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.17 - width_in_pixels * 0.15 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.8 &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.8 - height_in_pixels * 0.15) {
-                    buttons.at("S") = 0;
-                    left_down_arrow_color[3] = 1.0f;
-                }
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.95 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.95 - width_in_pixels * 0.15 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.8 &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.8 - height_in_pixels * 0.15) {
-                    buttons.at("D") = 0;
-                    right_down_arrow_color[3] = 1.0f;
-                }
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.02f + width_in_pixels * 0.15 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.02f &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.2 + height_in_pixels * 0.15) {
-                    buttons.at("W") = 0;
-                    left_up_arrow_color[3] = 1.0f;
-                }
-                else if (Event.tfinger.x * width_in_pixels < width_in_pixels * 0.8f + width_in_pixels * 0.15 &&
-                    Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8f &&
-                    Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
-                    Event.tfinger.y * height_in_pixels < height_in_pixels * 0.2 + height_in_pixels * 0.15) {
-                    buttons.at("A") = 0;
-                    right_up_arrow_color[3] = 1.0f;
-                }
-            }
-
-            if (Event.type == SDL_EVENT_FINGER_MOTION)
-            {
-                if (Event.tfinger.dx > 0)
-                    buttons.at("MOUSE_WHEEL") = 0.5f;
-                else
-                    buttons.at("MOUSE_WHEEL") = -0.5f;
-            }
+             if (Event.type == SDL_EVENT_FINGER_UP) {
+                 buttons.at("MOUSE_UP") = 1;
+                 if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.05 &&
+                     Event.tfinger.x * width_in_pixels <
+                     width_in_pixels * 0.05 + width_in_pixels * 0.15 &&
+                     Event.tfinger.y * height_in_pixels > height_in_pixels * 0.6 &&
+                     Event.tfinger.y * height_in_pixels <
+                     height_in_pixels * 0.6 + height_in_pixels * 0.15) {
+                     buttons.at("S") = 0;
+                     left_down_arrow_color[3] = 1.0f;
+                 } else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8 &&
+                            Event.tfinger.x * width_in_pixels <
+                            width_in_pixels * 0.8 + width_in_pixels * 0.15 &&
+                            Event.tfinger.y * height_in_pixels > height_in_pixels * 0.6 &&
+                            Event.tfinger.y * height_in_pixels <
+                            height_in_pixels * 0.6 + height_in_pixels * 0.15) {
+                     buttons.at("D") = 0;
+                     right_down_arrow_color[3] = 1.0f;
+                 } else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.05 &&
+                            Event.tfinger.x * width_in_pixels <
+                            width_in_pixels * 0.05 + width_in_pixels * 0.15 &&
+                            Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
+                            Event.tfinger.y * height_in_pixels <
+                            height_in_pixels * 0.2 + height_in_pixels * 0.15) {
+                     buttons.at("W") = 0;
+                     left_up_arrow_color[3] = 1.0f;
+                 } else if (Event.tfinger.x * width_in_pixels > width_in_pixels * 0.8f &&
+                            Event.tfinger.x * width_in_pixels <
+                            width_in_pixels * 0.8f + width_in_pixels * 0.15 &&
+                            Event.tfinger.y * height_in_pixels > height_in_pixels * 0.2 &&
+                            Event.tfinger.y * height_in_pixels <
+                            height_in_pixels * 0.2 + height_in_pixels * 0.15) {
+                     buttons.at("A") = 0;
+                     right_up_arrow_color[3] = 1.0f;
+                 }
+             }
+             if(Event.type == SDL_EVENT_FINGER_MOTION){
+                 if(Event.tfinger.dx > 0)
+                     buttons.at("MOUSE_WHEEL") = 0.5f;
+                 else
+                     buttons.at("MOUSE_WHEEL") = -0.5f;
+             }
 #else
             if (Event.type == SDL_EVENT_KEY_DOWN)
             {
@@ -279,6 +278,7 @@ public:
             if (Event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
             {
                 buttons.at("MOUSE_CLICK") = 1;
+                buttons.at("MOUSE_UP") = 1;
             }
 
             if (Event.type == SDL_EVENT_MOUSE_WHEEL)
@@ -290,7 +290,7 @@ public:
         return true;
     }
 
-    int check_button(string button) { return buttons.at(button); }
+    float check_button(string button) { return buttons.at(button); }
 
     unsigned int get_time() { return (unsigned int)SDL_GetTicks(); }
 
@@ -498,7 +498,6 @@ public:
     {
         ImGui::Render();
         DearImGUI_Render(ImGui::GetDrawData());
-        draw_control_arrows();
         SDL_GL_SwapWindow(window);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -691,6 +690,9 @@ public:
         ImGui::Text("SCORE: %d", score);
 
         ImGui::End();
+		#ifdef __ANDROID__
+        draw_control_arrows();
+		#endif
     }
 
     void init_gui()
@@ -789,13 +791,11 @@ public:
             ImVec2(float(p_width / width), float(p_height / height));
 
         float  x, y;
-        Uint32 mask = SDL_GetMouseState(&x, &y);
-
+        SDL_GetMouseState(&x, &y);
         io.MousePos.x = x;
         io.MousePos.y = y;
 
-        io.MouseDown[0] = (mask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
-
+        io.MouseDown[0] = buttons.at("MOUSE_UP");
         ImGui::NewFrame();
     }
 
@@ -821,7 +821,7 @@ public:
             data[size] = '\0';
         }
         else {
-            logToLogcat(SDL_GetError());
+            //logToLogcat(SDL_GetError());
         }
     }
 
@@ -833,7 +833,7 @@ private:
 
     int   width_in_pixels = 1900, height_in_pixels = 680;
 
-    unordered_map<string, int> buttons{ { "A", 0 },           { "W", 0 },
+    unordered_map<string, float> buttons{ { "A", 0 },           { "W", 0 },
                                         { "S", 0 },           { "D", 0 },
                                         { "MOUSE_WHEEL", 0 }, { "MOUSE_CLICK", 0 },
                                         { "MOUSE_UP",0} };
@@ -845,7 +845,7 @@ private:
                                                 { "tank_part_2", 0 } , { "missile"    , 0 },
                                                 { "brick_wall" , 0 } , { "broken_wall", 0 },
                                                 { "stone_wall" , 0 } , { "background", 0  },
-                                                { "arrow",       0 }};
+                                                { "arrow_up",    0 },  { "arrow_down",  0 }};
 
     unordered_map<string, unsigned int> vertex_buffers{ {"tank"      ,0}, {"missile",0},
                                                         {"animation" ,0}, {"object" ,0},
@@ -856,9 +856,9 @@ private:
 
     vector<float> arrows_vertecies = {
         0.0f,                    0.0f,                     0.0f, 0.0f, 0.0f,
-        width_in_pixels * 0.15f, 0.0f,                     0.0f, 1.0f, 0.0f,
-        width_in_pixels * 0.15f, height_in_pixels * 0.15f, 0.0f, 1.0f, 1.0f,
-        0.0f,                    height_in_pixels * 0.15f, 0.0f, 0.0f, 1.0f };
+        width * 0.15f, 0.0f,                     0.0f, 1.0f, 0.0f,
+        width * 0.15f, height * 0.15f, 0.0f, 1.0f, 1.0f,
+        0.0f,                    height * 0.15f, 0.0f, 0.0f, 1.0f };
 
 
     vector<float> arrow_color = { 1.0f,1.0f,1.0f,1.0f };
@@ -1002,41 +1002,40 @@ private:
 
     void draw_control_arrows() {
 
-        vector<float> m = math.matrix_multiplying(math.rotate_matrix(3.14), math.shift_matrix(-1.0f, 1.0f));
+        vector<float> m = math.shift_matrix(-1.0f, 1.0f);
 
         render_triangle(
-            "arrow",
-            m,
-            math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
-            math.shift_matrix(width_in_pixels * 0.83f, height_in_pixels * 0.2f),
-            left_down_arrow_color,
-            get_texture("arrow"),
-            false);
+                "arrow",
+                m,
+                math.scaling_matrix(2.0f / width, -2.0f / height),
+                math.shift_matrix(width * 0.05f, height * 0.6f),
+                left_down_arrow_color,
+                get_texture("arrow_down"),
+                false);
 
         render_triangle("arrow",
-            m,
-            math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels),
-            math.shift_matrix(width_in_pixels * 0.05f, height_in_pixels * 0.2f),
-            right_down_arrow_color,
-            get_texture("arrow"),
-            false);
-
-        m = math.matrix_multiplying(math.shift_matrix(-1.0f, 1.0f), math.scaling_matrix(2.0f / width_in_pixels, -2.0f / height_in_pixels));
-        render_triangle("arrow",
-            m,
-            math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.02f, height_in_pixels * 0.2f), 
-            left_up_arrow_color,
-            get_texture("arrow"),
-            false);
+                        m,
+                        math.scaling_matrix(2.0f / width, -2.0f / height),
+                        math.shift_matrix(width * 0.8f, height * 0.6f),
+                        right_down_arrow_color,
+                        get_texture("arrow_down"),
+                        false);
 
         render_triangle("arrow",
-            m,
-            math.single_matrix(),
-            math.shift_matrix(width_in_pixels * 0.80f, height_in_pixels * 0.2f), 
-            right_up_arrow_color,
-            get_texture("arrow"),
-            false);
+                        m,
+                        math.scaling_matrix(2.0f / width, -2.0f / height),
+                        math.shift_matrix(width * 0.05f, height * 0.2f),
+                        left_up_arrow_color,
+                        get_texture("arrow_up"),
+                        false);
+
+        render_triangle("arrow",
+                        m,
+                        math.scaling_matrix(2.0f / width, -2.0f / height),
+                        math.shift_matrix(width * 0.8f, height * 0.2f),
+                        right_up_arrow_color,
+                        get_texture("arrow_up"),
+                        false);
     }
 
     void gen_buffers(unsigned int& buffer_handel) {

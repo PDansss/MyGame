@@ -24,7 +24,7 @@ class ENGSPEC IEngine
 public:
     virtual void         init(int x, int y, vector<float>& norm, float scale) = 0;
     virtual bool         read_events()                           = 0;
-    virtual int          check_button(string button)             = 0;
+    virtual float        check_button(string button)             = 0;
     virtual unsigned int get_time()                              = 0;
     virtual void         clean()                                 = 0;
     virtual ~IEngine()                                           = default;

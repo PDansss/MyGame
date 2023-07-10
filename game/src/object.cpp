@@ -18,24 +18,27 @@ void obstacles::set_obstacle(const char* path)
 {
     char* src = nullptr;
     engine->get_char_source(path, src);
-    istringstream iss(reinterpret_cast<const char*>(src)); // Создание std::istringstream с исходными данными
+    istringstream iss(reinterpret_cast<const char*>(src)); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ std::istringstream пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     delete[] src;
     string type;
     string x, y;
+
+    vector<obstacle> temp;
 
     while (iss >> x >> y >> type)
     {
         if (type == "stones")
         {
-            my_obstacles.push_back(
-                { stof(x) * scale_param, stof(y) * scale_param, true, stone_wall, false, false });
+            temp.push_back(
+                    { stof(x) * scale_param, stof(y) * scale_param, true, stone_wall, false, false });
         }
         else
         {
-            my_obstacles.push_back(
-                { stof(x) * scale_param, stof(y) * scale_param, true, bricks_wall, true, false });
+            temp.push_back(
+                    { stof(x) * scale_param, stof(y) * scale_param, true, bricks_wall, true, false });
         }
     }
+    my_obstacles = temp;
 }
 
 void obstacles::render()

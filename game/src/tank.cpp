@@ -203,10 +203,10 @@ public:
                                  right_up_x,  right_up_y,   x,
                                  y,           _x,           _y };
 
-        attr = { left_down_x , left_down_y, 1,1,0,1,  
-                 left_up_x   , left_up_y,   1,1,0,1,   
-                 right_down_x, right_down_y,1,1,0,1,
-                 right_up_x  , right_up_y,  1,1,0,1};
+//        attr = { left_down_x , left_down_y, 1,1,0,1,
+//                 left_up_x   , left_up_y,   1,1,0,1,
+//                 right_down_x, right_down_y,1,1,0,1,
+//                 right_up_x  , right_up_y,  1,1,0,1};
 
         return hitbox;
     }
@@ -232,33 +232,33 @@ public:
                 float obj_right_up_y = (object_center_y + 0.1f * normolize_matrix[4]);
                
 
-                attr.push_back(obj_left_down_x);
-                attr.push_back(obj_left_down_y);
-                attr.push_back(1);
-                attr.push_back(1);
-                attr.push_back(0);
-                attr.push_back(0);
-
-                attr.push_back(obj_left_down_x);
-                attr.push_back(obj_right_up_y);
-                attr.push_back(1);
-                attr.push_back(1);
-                attr.push_back(0);
-                attr.push_back(0);
-
-                attr.push_back(obj_right_down_x);
-                attr.push_back(obj_left_down_y);
-                attr.push_back(1);
-                attr.push_back(1);
-                attr.push_back(0);
-                attr.push_back(0);
-
-                attr.push_back(obj_right_down_x);
-                attr.push_back(obj_right_up_y);
-                attr.push_back(1);
-                attr.push_back(1);
-                attr.push_back(0);
-                attr.push_back(0);
+//                attr.push_back(obj_left_down_x);
+//                attr.push_back(obj_left_down_y);
+//                attr.push_back(1);
+//                attr.push_back(1);
+//                attr.push_back(0);
+//                attr.push_back(0);
+//
+//                attr.push_back(obj_left_down_x);
+//                attr.push_back(obj_right_up_y);
+//                attr.push_back(1);
+//                attr.push_back(1);
+//                attr.push_back(0);
+//                attr.push_back(0);
+//
+//                attr.push_back(obj_right_down_x);
+//                attr.push_back(obj_left_down_y);
+//                attr.push_back(1);
+//                attr.push_back(1);
+//                attr.push_back(0);
+//                attr.push_back(0);
+//
+//                attr.push_back(obj_right_down_x);
+//                attr.push_back(obj_right_up_y);
+//                attr.push_back(1);
+//                attr.push_back(1);
+//                attr.push_back(0);
+//                attr.push_back(0);
 
                 for (int j = 0; j < hitbox.size(); j += 2)
                 {

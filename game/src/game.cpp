@@ -36,7 +36,7 @@ const vector<unsigned int> indexes = { 0,1,2,0,2,3 };
 
 int main(int argc, char *argv[])
 {
-	const int  width = 2340 , height = 1080;
+	const int  width = 2250 , height = 1080;
 	const float scale = 0.4f;
 	const float scaling_coff = 1 / scale;
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     int score = 0;
 
-    ITank* player = create_tank(myeng, 1.0f, 0.9f, 1.57f, norm, scaling_coff);
+    ITank* player = create_tank(myeng, 1.4f, 1.2f, 1.57f, norm, scaling_coff);
 
     ITank* enemy1 = create_enemy_tank(
         myeng, player, -0.5f, -0.3f, 0.f, norm, scaling_coff, &score);
@@ -79,7 +79,6 @@ int main(int argc, char *argv[])
     player->set_stack(positions);
 
     obstacles obs(myeng, norm, scaling_coff);
-    obs.set_obstacle("res/level.txt");
 
     bool show_main_menu = true, pause = false, exit = false;
 	unsigned int time = 0, temp = 0;
