@@ -1,10 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22.1)
 
 project(GAME LANGUAGES CXX C)
-
-find_package(SDL3 REQUIRED)
-
-file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR})
 
 add_library(engine SHARED engine/include/engine.hpp  engine/include/my_audio.hpp engine/include/my_math.hpp
                           engine/include/picopng.hpp engine/src/engine.cpp engine/glad/glad.c
@@ -13,30 +9,63 @@ add_library(engine SHARED engine/include/engine.hpp  engine/include/my_audio.hpp
                           engine/ImGUI/imgui_widgets.cpp engine/ImGUI/imstb_rectpack.h engine/ImGUI/imgui_internal.h
                           engine/ImGUI/imgui_tables.cpp engine/ImGUI/imstb_textedit.h engine/ImGUI/imstb_truetype.h)
 
-target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIRECTORY})
-target_include_directories(engine PUBLIC engine/include engine/glad engine/KHR engine/ImGUI)
-target_compile_features(engine PUBLIC cxx_std_20)
-target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 
-add_executable(game  game/game.cpp game/tank.cpp game/tank.hpp game/enemy.cpp
-                     game/object.hpp game/animation.hpp game/missile.hpp)
-target_compile_features(game PUBLIC cxx_std_20)
-target_link_libraries(game PRIVATE engine)
+    add_subdirectory(${SDL3_SRC_DIR} ${CMAKE_CURRENT_BINARY_DIR}/SDL_${ANDROID_ABI})
 
-option(OM_ENABLE_ADDRESS_SANITIZER_FOR_SPRITE_TEST
-       [[Use address sanitizer to find out memory bug.
-Works only on Linux. You should already install library:
-```sudo dnf install libasan```
-To see line numbers in asan log configure your build with
-```CMAKE_BUILD_TYPE=Debug```.]] OFF)
+	target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIRECTORY})
 
-if(OM_ENABLE_ADDRESS_SANITIZER_FOR_SPRITE_TEST)
-    message(STATUS "use address sanitizer to find memory bug in GAME")
-    add_library(sanitizer INTERFACE)
-    target_compile_options(sanitizer INTERFACE -fsanitize=address)
-    target_link_options(sanitizer INTERFACE -fsanitize=address)
+	target_include_directories(engine PUBLIC engine/include engine/glad engine/KHR engine/ImGUI)
+	target_link_libraries(engine PRIVATE SDL3::SDL3-shared
+								 android
+								 log
+								 EGL
+								 GLESv3)
 
-    target_link_libraries(engine PRIVATE sanitizer)
-    target_link_libraries(game PRIVATE sanitizer)
+	target_compile_features(engine PUBLIC cxx_std_20)
+
+	add_library(game SHARED)
+	target_compile_features(game PUBLIC cxx_std_20)
+	
+	target_sources(game PRIVATE game/src/game.cpp game/src/tank.cpp game/include/tank.hpp game/src/enemy.cpp
+							    game/include/object.hpp game/include/animation.hpp game/include/missile.hpp 
+							    game/include/morphing.hpp game/src/animation.cpp game/src/missile.cpp game/src/object.cpp)
+	target_include_directories(game PUBLIC game/include)
+	target_link_libraries(game PRIVATE engine SDL3::SDL3-shared)
+	
+else()
+    find_package(SDL3 REQUIRED)
+
+    file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_BINARY_DIR})
+
+    target_include_directories(engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIRECTORY})
+    target_include_directories(engine PUBLIC engine/include engine/glad engine/KHR engine/ImGUI)
+
+    target_compile_features(engine PUBLIC cxx_std_20)
+    target_link_libraries(engine PRIVATE SDL3::SDL3-shared)
+
+    add_executable(game  game/src/game.cpp game/src/tank.cpp game/include/tank.hpp game/src/enemy.cpp
+                         game/include/object.hpp game/include/animation.hpp game/include/missile.hpp 
+                         game/include/morphing.hpp game/src/animation.cpp game/src/missile.cpp game/src/object.cpp)
+
+    target_include_directories(game PUBLIC game/include)
+    target_compile_features(game PUBLIC cxx_std_20)
+    target_link_libraries(game PRIVATE engine)
+
+    option(OM_ENABLE_ADDRESS_SANITIZER_FOR_SPRITE_TEST
+           [[Use address sanitizer to find out memory bug.
+    Works only on Linux. You should already install library:
+    ```sudo dnf install libasan```
+    To see line numbers in asan log configure your build with
+    ```CMAKE_BUILD_TYPE=Debug```.]] OFF)
+
+    if(OM_ENABLE_ADDRESS_SANITIZER_FOR_SPRITE_TEST)
+        message(STATUS "use address sanitizer to find memory bug in GAME")
+        add_library(sanitizer INTERFACE)
+        target_compile_options(sanitizer INTERFACE -fsanitize=address)
+        target_link_options(sanitizer INTERFACE -fsanitize=address)
+
+        target_link_libraries(engine PRIVATE sanitizer)
+        target_link_libraries(game PRIVATE sanitizer)
+    endif()
 endif()
-

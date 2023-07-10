@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+#include "my_math.hpp"
 #include "imgui.h"
 
 #pragma once
@@ -11,54 +12,57 @@
 #define ENGSPEC
 #endif
 
+#ifdef __ANDROID__
+#include <SDL3/SDL_main.h>
+#define main SDL_main
+#endif
+
 using namespace std;
 
 class ENGSPEC IEngine
 {
 public:
-    // general
-    virtual void         init(int x, int y, vector<float>& norm)          = 0;
-    virtual bool         read_events()                                    = 0;
-    virtual int          check_button(string button)                      = 0;
-    virtual unsigned int get_time()                                       = 0;
-    virtual void         clean()                                          = 0;
-    virtual ~IEngine()                                                    = default;
-
-    // render
-    virtual unsigned int set_program(const char* vertex_shader,
-                                     const char* fragment_shader) = 0;
-
-    virtual unsigned int set_texture(const char* path) = 0;
+    virtual void         init(int x, int y, vector<float>& norm, float scale) = 0;
+    virtual bool         read_events()                           = 0;
+    virtual int          check_button(string button)             = 0;
+    virtual unsigned int get_time()                              = 0;
+    virtual void         clean()                                 = 0;
+    virtual ~IEngine()                                           = default;
 
     virtual void display() = 0;
 
-    virtual void render_triangle(vector<float> atribute_vertex,
+    virtual void render_triangle(string buffer,
                                  vector<float> normolize_matrix,
                                  vector<float> shift_matrix,
                                  vector<float> buffer_matrix,
+                                 vector<float> color,
                                  unsigned int  texture,
                                  bool          blending) = 0;
 
-    virtual void         texture_clean()    = 0;
-    virtual unsigned int get_texture(int n) = 0;
+    virtual void render_triangle(string buffer,
+                                 string buffer2,
+                                 int num, 
+                                 vector<float> normolize_matrix,
+                                 vector<float> shift_matrix) = 0;
 
-    //    // ImGUI
-    virtual void Render_gui(float*        vertecies,
-                            unsigned int* indexes,
-                            vector<float> matrix,
-                            unsigned int  size) = 0;
+    virtual void render_line(vector<float> attributes, 
+                             vector<float> normolize_matrix,
+                             vector<float> shift_matrix,
+                             vector<float> buffer_matrix, 
+                             vector<unsigned int> ind) = 0;
+   
+    virtual void set_buffer(unsigned int buffer, vector<float> data)        = 0;
+    virtual void set_buffer(unsigned int buffer, vector<unsigned int> data) = 0;
+    virtual unsigned int get_vertex_buffer(string texture)                  = 0;
+    virtual unsigned int get_index_buffer(string texture)                   = 0;
+    virtual unsigned int get_texture(string texture)                        = 0;
 
-    virtual void create_texture_gui()               = 0;
-    virtual void init_gui()                         = 0;
-    virtual void DearImGUI_Render(ImDrawData* data) = 0;
-    virtual void next_frame_gui()                   = 0;
-    virtual void shitdown_gui()                     = 0;
+    virtual void get_char_source(const char* path, char*& data) = 0;
 
     virtual void draw_main_menu(bool& show_main_menu, bool& exit) = 0;
     virtual void draw_pause_menu(bool& is_paused, bool& is_exit)  = 0;
-    virtual void draw_wiget_elements(bool& is_paused, int score)  = 0;
+    virtual void draw_widgets(bool& is_paused, int score)  = 0;
 
-    // Audio
     virtual void play_audio_from_beginning(int num) = 0;
     virtual void play_audio(int num)                = 0;
     virtual void stop_audio(int num)                = 0;

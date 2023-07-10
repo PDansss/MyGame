@@ -1,34 +1,13 @@
 #include "tank.hpp"
 #include "engine.hpp"
 
-vector<float> triangle_1_base = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                  0.0f,  1.0f,  0.2f,  0.1f,  0.0f,  0.6f,
-                                  0.75f, 0.35f, 0.0f,  0.0f,  0.2f,  -0.1f,
-                                  0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  0.0f };
-
-vector<float> triangle_2_base = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                  0.0f,  1.0f,  0.2f,  -0.1f, 0.0f,  0.6f,
-                                  0.75f, 0.35f, 1.0f,  0.0f,  -0.2f, -0.1f,
-                                  0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  1.0f };
-
-vector<float> triangle_1_turret = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                    0.0f,  1.0f,  0.2f,  0.1f,  0.0f,  0.6f,
-                                    0.75f, 0.35f, 0.0f,  0.0f,  0.2f,  -0.1f,
-                                    0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  0.0f };
-
-vector<float> triangle_2_turret = { -0.2f, 0.1f,  0.0f,  0.6f,  0.75f, 0.35f,
-                                    0.0f,  1.0f,  0.2f,  -0.1f, 0.0f,  0.6f,
-                                    0.75f, 0.35f, 1.0f,  0.0f,  -0.2f, -0.1f,
-                                    0.0f,  0.6f,  0.75f, 0.35f, 1.0f,  1.0f };
-
 class tank : public ITank
 {
 public:
     tank(IEngine*      eng,
          float         x,
          float         y,
-         float         base_ang,
-         float         tur_ang,
+         float         angle,
          vector<float> norm_matrix,
          float         coeff)
     {
@@ -39,52 +18,38 @@ public:
         tank_center_y       = y;
         start_x             = x;
         start_y             = y;
-        base_angle          = base_ang;
-        start_base_angle    = base_ang;
-        turret_angle        = tur_ang;
-        start_turret_angle  = tur_ang;
+
+        base_angle          = angle;
+        start_base_angle    = angle;
+        turret_angle        = angle;
+        start_turret_angle  = angle;
+
         scaling_coefficient = coeff;
-        base_texture        = eng->get_texture(7);
-        turret_texture      = eng->get_texture(8);
-        missile_texture     = eng->get_texture(9);
     }
 
     void render()
     {
-        // Draw platform
         engine->render_triangle(
-            triangle_1_base,
+            "tank",
             normolize_matrix,
             matrices.shift_matrix(tank_center_x, tank_center_y),
             matrices.rotate_matrix(base_angle),
-            base_texture,
-            false);
-        engine->render_triangle(
-            triangle_2_base,
-            normolize_matrix,
-            matrices.shift_matrix(tank_center_x, tank_center_y),
-            matrices.rotate_matrix(base_angle),
-            base_texture,
+            color,
+            engine->get_texture("tank_part_1"),
             false);
 
-        // Draw turret
         engine->render_triangle(
-            triangle_1_turret,
+            "tank",
             normolize_matrix,
             matrices.shift_matrix(tank_center_x, tank_center_y),
             matrices.rotate_matrix(turret_angle),
-            turret_texture,
+            color,
+            engine->get_texture("tank_part_2"),
             true);
-        engine->render_triangle(
-            triangle_2_turret,
-            normolize_matrix,
-            matrices.shift_matrix(tank_center_x, tank_center_y),
-            matrices.rotate_matrix(turret_angle),
-            turret_texture,
-            true);
+
+        //engine->render_line(attr, matrices.single_matrix(), matrices.single_matrix(),matrices.single_matrix(), ind);
 
         // Draw missile
-
         missiles.draw_missile(engine, normolize_matrix);
         explosion_animation.draw_animation(engine, normolize_matrix);
     }
@@ -109,10 +74,16 @@ public:
             if (engine->check_button("A"))
             {
                 d_angle = base_angle_speed;
+                cout << "angle = " << base_angle + d_angle << endl;
+                cout << "cos = " << cos(base_angle + d_angle) << endl;
+                cout << "sin = " << sin(base_angle + d_angle) << endl << endl;
             }
             if (engine->check_button("D"))
             {
                 d_angle = -base_angle_speed;
+                cout << "angle = " << base_angle + d_angle << endl;
+                cout << "cos = " << cos(base_angle + d_angle) << endl;
+                cout << "sin = " << sin(base_angle + d_angle) << endl << endl;
             }
 
             turret_angle +=
@@ -120,12 +91,9 @@ public:
 
             if (engine->check_button("MOUSE_CLICK")) // SPACE
             {
-                float exposion_x =
-                    normolize_matrix[0] * cos(turret_angle) * 0.25f +
-                    tank_center_x * normolize_matrix[0];
-                float exposion_y =
-                    normolize_matrix[4] * sin(turret_angle) * 0.25f +
-                    tank_center_y * normolize_matrix[4];
+                float exposion_x = (cos(turret_angle) * 0.25f + tank_center_x) * normolize_matrix[0];
+                float exposion_y = (sin(turret_angle) * 0.25f + tank_center_y) * normolize_matrix[4];
+                
                 engine->play_audio(2);
 
                 explosion_animation.add_animation(exposion_x, exposion_y, 1);
@@ -172,13 +140,12 @@ public:
                             scaling_coefficient,
                             explosion_animation);
         }
-
-        // check_missile_collision_with_walls(missiles, objects);
     }
+
     vector<float> get_hitbox(float d_x, float d_y, float d_angle)
     {
-        float left_down_x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
-        float left_down_y = (tank_center_y + d_y - 0.1f) * normolize_matrix[4];
+        float left_down_x = ((tank_center_x) * normolize_matrix[0]) - 0.2f * (1 / scaling_coefficient);
+        float left_down_y = ((tank_center_y) * normolize_matrix[4]) - 0.1f * (1 / scaling_coefficient);
 
         rotate(left_down_x,
                left_down_y,
@@ -186,52 +153,61 @@ public:
                (tank_center_y + d_y) * normolize_matrix[4],
                base_angle + d_angle);
 
-        float left_up_x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
-        float left_up_y = (tank_center_y + d_y + 0.1f) * normolize_matrix[4];
+        float left_up_x = ((tank_center_x) * normolize_matrix[0]) - 0.2f * (1 / scaling_coefficient);
+        float left_up_y = ((tank_center_y) * normolize_matrix[4]) + 0.1f * (1 / scaling_coefficient);
 
         rotate(left_up_x,
                left_up_y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
-               base_angle + d_angle);
+            base_angle + d_angle);
 
-        float right_down_x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
-        float right_down_y = (tank_center_y + d_y - 0.1f) * normolize_matrix[4];
+        float right_down_x = ((tank_center_x + d_x) * normolize_matrix[0]) + 0.1f * (1 / scaling_coefficient);
+        float right_down_y = ((tank_center_y + d_y) * normolize_matrix[4]) - 0.1f * (1 / scaling_coefficient);
 
         rotate(right_down_x,
                right_down_y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
-               base_angle + d_angle);
+            base_angle + d_angle);
 
-        float right_up_x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
-        float right_up_y = (tank_center_y + d_y + 0.1f) * normolize_matrix[4];
+        float right_up_x = ((tank_center_x + d_x) * normolize_matrix[0]) + 0.1f * (1 / scaling_coefficient);
+        float right_up_y = ((tank_center_y + d_y) * normolize_matrix[4]) + 0.1f * (1 / scaling_coefficient);
+
         rotate(right_up_x,
                right_up_y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
-               base_angle + d_angle);
+            base_angle + d_angle);
 
-        float x = (tank_center_x + d_x + 0.14f) * normolize_matrix[0];
-        float y = (tank_center_y + d_y) * normolize_matrix[4];
+        float x = ((tank_center_x + d_x) * normolize_matrix[0]) + 0.1f * (1 / scaling_coefficient);
+        float y = ((tank_center_y + d_y) * normolize_matrix[4]);
+
         rotate(x,
                y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
-               base_angle + d_angle);
+            base_angle + d_angle);
 
-        float _x = (tank_center_x + d_x - 0.2f) * normolize_matrix[0];
-        float _y = (tank_center_y + d_y) * normolize_matrix[4];
+        float _x = ((tank_center_x + d_x) * normolize_matrix[0]) - 0.2f * (1 / scaling_coefficient);
+        float _y = ((tank_center_y + d_y) * normolize_matrix[4]);
+
         rotate(_x,
                _y,
                (tank_center_x + d_x) * normolize_matrix[0],
                (tank_center_y + d_y) * normolize_matrix[4],
-               base_angle + d_angle);
+            base_angle + d_angle);
 
         vector<float> hitbox = { left_down_x, left_down_y,  left_up_x,
                                  left_up_y,   right_down_x, right_down_y,
                                  right_up_x,  right_up_y,   x,
                                  y,           _x,           _y };
+
+        attr = { left_down_x , left_down_y, 1,1,0,1,  
+                 left_up_x   , left_up_y,   1,1,0,1,   
+                 right_down_x, right_down_y,1,1,0,1,
+                 right_up_x  , right_up_y,  1,1,0,1};
+
         return hitbox;
     }
 
@@ -244,17 +220,45 @@ public:
         {
             if (objects[i].exist)
             {
-                float obj_x =
-                    objects[i].x * normolize_matrix[0] * scaling_coefficient;
-                float obj_y =
-                    objects[i].y * normolize_matrix[4] * scaling_coefficient;
+                vector <float> attr;
+                float object_center_x = objects[i].x * normolize_matrix[0];
+                float object_center_y = objects[i].y * normolize_matrix[4];
 
-                float obj_left_down_x = (obj_x - 0.1f * normolize_matrix[0]);
-                float obj_left_down_y = (obj_y - 0.1f * normolize_matrix[4]);
+                float obj_left_down_x = (object_center_x - 0.1f * normolize_matrix[0]);
+                float obj_left_down_y = (object_center_y - 0.1f * normolize_matrix[4]);
 
-                float obj_right_down_x = (obj_x + 0.1f * normolize_matrix[0]);
+                float obj_right_down_x = (object_center_x + 0.1f * normolize_matrix[0]);
 
-                float obj_right_up_y = (obj_y + 0.1f * normolize_matrix[4]);
+                float obj_right_up_y = (object_center_y + 0.1f * normolize_matrix[4]);
+               
+
+                attr.push_back(obj_left_down_x);
+                attr.push_back(obj_left_down_y);
+                attr.push_back(1);
+                attr.push_back(1);
+                attr.push_back(0);
+                attr.push_back(0);
+
+                attr.push_back(obj_left_down_x);
+                attr.push_back(obj_right_up_y);
+                attr.push_back(1);
+                attr.push_back(1);
+                attr.push_back(0);
+                attr.push_back(0);
+
+                attr.push_back(obj_right_down_x);
+                attr.push_back(obj_left_down_y);
+                attr.push_back(1);
+                attr.push_back(1);
+                attr.push_back(0);
+                attr.push_back(0);
+
+                attr.push_back(obj_right_down_x);
+                attr.push_back(obj_right_up_y);
+                attr.push_back(1);
+                attr.push_back(1);
+                attr.push_back(0);
+                attr.push_back(0);
 
                 for (int j = 0; j < hitbox.size(); j += 2)
                 {
@@ -266,6 +270,7 @@ public:
                         return true;
                     }
                 }
+                //engine->render_line(attr, matrices.single_matrix(), matrices.single_matrix(), matrices.single_matrix(), ind);
             }
         }
         return false;
@@ -283,10 +288,8 @@ public:
 
     void shoot()
     {
-        float exposion_x = normolize_matrix[0] * cos(turret_angle) * 0.25f +
-                           tank_center_x * normolize_matrix[0];
-        float exposion_y = normolize_matrix[4] * sin(turret_angle) * 0.25f +
-                           tank_center_y * normolize_matrix[4];
+        float exposion_x = (cos(turret_angle) * 0.25f + tank_center_x) * normolize_matrix[0];
+        float exposion_y = (sin(turret_angle) * 0.25f + tank_center_y) * normolize_matrix[4];
         explosion_animation.add_animation(exposion_x, exposion_y, 1);
         missiles.add_missile_to_stack(
             tank_center_x, tank_center_y, turret_angle);
@@ -318,10 +321,14 @@ private:
     my_math       matrices;
     vector<float> normolize_matrix;
     float         scaling_coefficient;
-    unsigned int  base_texture, turret_texture, missile_texture;
 
     animation explosion_animation;
     Missile   missiles;
+
+    vector<float> attr;
+    vector<unsigned int> ind = { 0,1,3,2,0 };
+
+    vector<float> color = { 0.6f,  0.75f, 0.35f,1.0f };
 
     vector<stack<missile>*> positions;
 
@@ -343,34 +350,21 @@ private:
         float _x = x - cx;
         float _y = y - cy;
 
-        x = _x * cos(angle) - _y * sin(angle);
-        y = _x * sin(angle) + _y * cos(angle);
+        x = (_x * cos(angle) - _y * sin(angle)) * normolize_matrix[0] * scaling_coefficient;
+        y = (_x * sin(angle) + _y * cos(angle)) * normolize_matrix[4] * scaling_coefficient;
         x += cx;
         y += cy;
-    }
-    void set_color(vector<float>& vec, float r, float g, float b)
-    {
-        vec[3]  = r;
-        vec[4]  = g;
-        vec[5]  = b;
-        vec[11] = r;
-        vec[12] = g;
-        vec[13] = b;
-        vec[19] = r;
-        vec[20] = g;
-        vec[21] = b;
     }
 };
 
 ITank* create_tank(IEngine*      eng,
                    float         x,
                    float         y,
-                   float         ang_base,
-                   float         turret_ang,
+                   float         angle,
                    vector<float> norm,
                    float         coeff)
 {
-    return new tank(eng, x, y, ang_base, turret_ang, norm, coeff);
+    return new tank(eng, x, y, angle, norm, coeff);
 }
 void delete_tank(ITank* tank)
 {

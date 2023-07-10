@@ -1,7 +1,8 @@
-#include <SDL3/SDL.h>
 #include <cstring>
 #include <iostream>
 #include <vector>
+
+#include <SDL3/SDL.h>
 
 #pragma once
 
@@ -24,7 +25,7 @@ struct my_audio
         wav.silence  = 0;
         wav.userdata = this;
 
-        if (SDL_LoadWAV(path, &wav, &audio_buffer, &buffer_len) == NULL)
+        if (SDL_LoadWAV_RW(SDL_RWFromFile(path, "rb"), 1, &wav, &audio_buffer, &buffer_len) == NULL)
         {
             cout << "I can't load WAV file!" << endl;
         }
@@ -94,13 +95,8 @@ void MyCallBack(void* userdata, Uint8* stream, int len)
     memset(stream, 0, static_cast<size_t>(len));
     size_t length = static_cast<size_t>(len);
 
-    int vol;
     for (int i = 0; i < sounds.size(); i++)
     {
-        if (i == 0)
-            vol = 100;
-        else
-            vol = 128;
         my_audio* data = sounds[i];
 
         if (data->continue_play || data->play)
@@ -115,14 +111,14 @@ void MyCallBack(void* userdata, Uint8* stream, int len)
                 if (length < part)
                 {
                     SDL_MixAudioFormat(
-                        stream, current_position, SDL_AUDIO_S16, length, vol);
+                        stream, current_position, SDL_AUDIO_S16, length, 128);
                     data->offset += static_cast<size_t>(len);
                     break;
                 }
                 else
                 {
                     SDL_MixAudioFormat(
-                        stream, current_position, SDL_AUDIO_S16, part, vol);
+                        stream, current_position, SDL_AUDIO_S16, part, 128);
                     data->offset = 0;
                     length -= part;
                     data->continue_play = data->looped;
