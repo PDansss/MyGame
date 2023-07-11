@@ -1,13 +1,14 @@
 # Tanks Game
+My game was written on C++. I also use SDL3, Dear ImGui and OpenGL ES 3.0. 
 <h2>Platforms</h2>
-The game is available on three platforms. You can just download and play
+The game is available on three platforms. You can just download and play.
 <ul>
 <li><a href=https://github.com/PDansss/MyGame/releases/tag/Linux>Linux</a></li>
 <li><a href=https://github.com/PDansss/MyGame/releases/tag/Windows_Build>Windows</a></li>
 <li><a href=https://github.com/PDansss/MyGame/releases/tag/Android_Build>Android</a></li>
 </ul>
 <h2>Build</h2>
-If want to build the project, you have to install SDL3
+If want to build the project, you have to install <a href=https://www.libsdl.org/>SDL3</a>.
 <h3>Linux & Windows</h3>
 <pre>
 git clone https://github.com/PDansss/MyGame.git
